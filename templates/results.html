@@ -3,8 +3,6 @@
 <head>
 <title>Results</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛍️%3C/text%3E%3C/svg%3E">
-
 <style>
 /* --- DARK AZURE THEME BASE --- */
 body {
@@ -55,13 +53,14 @@ header {
 }
 .back-btn:hover { color: #38bdf8; }
 
-/* --- CONTROLS --- */
+/* --- CONTROLS CONTAINER (Search + Sort) --- */
 .controls {
     display: flex;
     gap: 15px;
     align-items: center;
 }
 
+/* Store Filter Input */
 .store-filter {
     background: rgba(30, 41, 59, 0.6);
     color: #e0f2fe;
@@ -103,7 +102,7 @@ header {
     color: white;
 }
 
-/* --- GRID --- */
+/* --- GRID LAYOUT --- */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -113,7 +112,7 @@ header {
     margin: 0 auto;
 }
 
-/* --- CARD --- */
+/* --- CARD DESIGN --- */
 .card {
     background: rgba(30, 41, 59, 0.4);
     border: 1px solid rgba(56, 189, 248, 0.1);
@@ -128,6 +127,7 @@ header {
     animation: cardSlideUp 0.6s ease-out forwards;
 }
 
+/* Animation Staggering */
 .card:nth-child(1) { animation-delay: 0.1s; }
 .card:nth-child(2) { animation-delay: 0.2s; }
 .card:nth-child(3) { animation-delay: 0.3s; }
@@ -172,7 +172,7 @@ header {
 }
 
 .store-name {
-    font-weight: 600;
+    font-weight: 600; /* Added for easy JS targeting */
 }
 
 .store-logo {
@@ -220,6 +220,7 @@ h3 {
     box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
 }
 
+/* Hidden class for filtering */
 .hidden {
     display: none !important;
 }
@@ -270,13 +271,17 @@ h3 {
 </div>
 
 <script>
+    // Real-time filtering script
     const storeInput = document.getElementById('storeInput');
     const cards = document.querySelectorAll('.card');
 
     storeInput.addEventListener('input', function(e) {
         const searchText = e.target.value.toLowerCase();
+
         cards.forEach(card => {
             const storeName = card.getAttribute('data-store');
+            
+            // If store name matches search OR search is empty, show card
             if (storeName.includes(searchText) || searchText === '') {
                 card.classList.remove('hidden');
             } else {
