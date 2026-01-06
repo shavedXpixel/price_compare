@@ -1,304 +1,290 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Future Shop</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
+<title>Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛍️</text></svg>">
+
 <style>
 /* --- DARK AZURE THEME BASE --- */
 body {
-    background: #020617; /* Very dark navy/black */
+    background: #020617;
     color: white;
     font-family: 'Poppins', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
-    overflow: hidden;
+    min-height: 100vh;
+    opacity: 0;
+    animation: pageFadeIn 1s ease-out forwards;
 }
 
-#particles-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
+@keyframes pageFadeIn {
+    0% { opacity: 0; transform: translateY(30px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* --- MAIN HERO UI --- */
-.hero-container {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    width: 100%;
-    max-width: 700px; /* Slightly wider to fit the new pills */
-    padding: 40px;
-    transition: all 0.8s ease-in;
+/* --- HEADER --- */
+header {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 20px;
 }
 
-h1 {
-    font-size: 4rem;
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 10px;
+.header-left h2 {
+    margin: 0;
+    font-size: 1.4rem;
     background: linear-gradient(to right, #e0f2fe, #0ea5e9);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 40px rgba(14, 165, 233, 0.3);
 }
 
-p.subtitle {
-    font-size: 1.2rem;
+.back-btn {
     color: #94a3b8;
-    margin-bottom: 40px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-}
-
-/* --- GLASS FORM BAR --- */
-.glass-form {
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(56, 189, 248, 0.2);
-    padding: 8px; /* Reduced padding since elements have their own */
-    border-radius: 60px; /* Larger pill container */
-    display: flex;
-    align-items: center; /* Center items vertically */
-    box-shadow: 0 0 50px rgba(2, 132, 199, 0.1);
+    text-decoration: none;
+    font-size: 0.85rem;
     transition: 0.3s;
+    display: block;
+    margin-top: 5px;
+}
+.back-btn:hover { color: #38bdf8; }
+
+/* --- CONTROLS --- */
+.controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
 }
 
-.glass-form:focus-within {
-    box-shadow: 0 0 60px rgba(14, 165, 233, 0.3);
-    border-color: rgba(56, 189, 248, 0.6);
-}
-
-input {
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 1.1rem;
-    padding: 15px 25px;
-    flex-grow: 1;
-    outline: none;
-}
-
-/* --- NEW PILL SHAPED SELECTOR --- */
-select {
-    background: rgba(30, 41, 59, 0.5); /* Distinct semi-transparent bg */
+.store-filter {
+    background: rgba(30, 41, 59, 0.6);
     color: #e0f2fe;
-    border: 1px solid rgba(56, 189, 248, 0.2);
-    padding: 14px 20px;
-    margin: 0 10px; /* Spacing between input and button */
-    border-radius: 50px; /* PILL SHAPE */
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: 0.3s;
+    width: 200px;
+}
+
+.store-filter:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.sort-select {
+    background: rgba(30, 41, 59, 0.6);
+    color: #e0f2fe;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
     cursor: pointer;
     outline: none;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.95rem;
     transition: 0.3s;
 }
 
-select:hover {
+.sort-select:hover {
     background: rgba(56, 189, 248, 0.1);
     border-color: #38bdf8;
 }
 
-select option {
-    background: #0f172a; /* Dark dropdown bg */
+.sort-select option {
+    background: #0f172a;
     color: white;
 }
 
-/* --- SEARCH BUTTON --- */
-button {
-    background: linear-gradient(135deg, #0284c7, #38bdf8);
-    color: #fff;
-    font-weight: 800;
-    border: none;
-    padding: 15px 40px;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: transform 0.2s;
-    font-size: 1rem;
-    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
-    flex-shrink: 0; /* Prevent button from squishing */
+/* --- GRID --- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 30px rgba(56, 189, 248, 0.7);
-}
-
-/* --- FOOTER CREDIT --- */
-.footer-credit {
-    position: fixed;
-    bottom: 20px;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    color: #94a3b8;
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-    z-index: 10;
-    opacity: 0.7;
-    transition: 0.3s;
-}
-
-.footer-credit:hover {
-    opacity: 1;
-    color: #38bdf8;
-    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-}
-
-/* --- TRANSITIONS --- */
-.ui-zoom-out {
-    transform: scale(2);
-    opacity: 0;
-    filter: blur(20px);
-}
-
-#loader-overlay {
-    position: fixed;
-    inset: 0;
-    background: #020617; 
-    z-index: 9999;
+/* --- CARD --- */
+.card {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(56, 189, 248, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
+    opacity: 0;
+    animation: cardSlideUp 0.6s ease-out forwards;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(n+5) { animation-delay: 0.5s; }
+
+@keyframes cardSlideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card:hover {
+    transform: translateY(-10px) scale(1.02);
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(56, 189, 248, 0.5);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(2, 132, 199, 0.2);
+}
+
+.img-container {
+    height: 180px;
+    display: flex;
     justify-content: center;
     align-items: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
+    margin-bottom: 15px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, rgba(0,0,0,0) 70%);
 }
 
-.tunnel-circle {
-    width: 100px;
-    height: 100px;
-    border: 2px solid rgba(2, 132, 199, 0.6);
-    border-radius: 50%;
-    position: absolute;
-    animation: zoom 1.5s infinite linear;
-    box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+.product-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
 }
 
-.tunnel-circle:nth-child(1) { animation-delay: 0s; }
-.tunnel-circle:nth-child(2) { animation-delay: 0.3s; }
-.tunnel-circle:nth-child(3) { animation-delay: 0.6s; }
-.tunnel-circle:nth-child(4) { animation-delay: 0.9s; }
-
-@keyframes zoom {
-    0% { transform: scale(0.1); opacity: 0; }
-    50% { opacity: 1; }
-    100% { transform: scale(4); opacity: 0; border-width: 10px; }
+.store-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    color: #94a3b8;
 }
 
-.loading-text {
-    color: #e0f2fe;
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.5rem;
+.store-name {
     font-weight: 600;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    margin-top: 250px;
-    text-shadow: 0 0 20px #0ea5e9;
-    animation: pulse 1s infinite alternate;
 }
 
-@keyframes pulse {
-    from { opacity: 0.4; }
-    to { opacity: 1; text-shadow: 0 0 40px #38bdf8; }
+.store-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    padding: 2px;
+}
+
+h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+    color: #e2e8f0;
+    flex-grow: 1;
+}
+
+.price-tag {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #38bdf8;
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+    margin-bottom: 15px;
+}
+
+.btn-offer {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #0284c7, #38bdf8);
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.3s;
+    opacity: 0.9;
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+}
+
+.btn-offer:hover {
+    opacity: 1;
+    letter-spacing: 1px;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+}
+
+.hidden {
+    display: none !important;
 }
 </style>
 </head>
 <body>
 
-<canvas id="particles-bg"></canvas>
+<header>
+    <div class="header-left">
+        <h2>Results for "{{ product }}"</h2>
+        <a href="/" class="back-btn">← Search Again</a>
+    </div>
 
-<div class="hero-container">
-    <h1>The Future<br>of Shopping</h1>
-    <p class="subtitle">Search. Compare. Save.</p>
+    <div class="controls">
+        <input type="text" id="storeInput" class="store-filter" placeholder="Filter by Store (e.g. Amazon)">
+
+        <form action="/search" method="POST" style="margin:0;">
+            <input type="hidden" name="product" value="{{ product }}">
+            <select name="sort" class="sort-select" onchange="this.form.submit()">
+                <option value="low" {% if sort_order == 'low' %}selected{% endif %}>Price: Low → High</option>
+                <option value="high" {% if sort_order == 'high' %}selected{% endif %}>Price: High → Low</option>
+            </select>
+        </form>
+    </div>
+</header>
+
+<div class="grid" id="resultsGrid">
+{% for r in results %}
+  <div class="card" data-store="{{ r.store | lower }}">
+    <div class="img-container">
+        {% if r.thumbnail %}
+            <img src="{{ r.thumbnail }}" class="product-img">
+        {% else %}
+            <div style="color: #555; font-size: 40px;">🛍️</div>
+        {% endif %}
+    </div>
     
-    <form class="glass-form" method="POST" action="/search">
-        <input type="text" name="product" placeholder="What are you looking for?" required autocomplete="off">
-        
-        <select name="sort">
-            <option value="low">Price: Low to High</option>
-            <option value="high">Price: High to Low</option>
-        </select>
+    <div class="store-info">
+      <img src="{{ url_for('static', filename='logos/' + r.logo) }}" class="store-logo">
+      <span class="store-name">{{ r.store }}</span>
+    </div>
 
-        <button type="submit">SEARCH</button>
-    </form>
-</div>
-
-<div class="footer-credit">
-    Made With ❤️ By Priyansu
-</div>
-
-<div id="loader-overlay">
-    <div class="tunnel-circle"></div>
-    <div class="tunnel-circle"></div>
-    <div class="tunnel-circle"></div>
-    <div class="tunnel-circle"></div>
-    <div class="loading-text">Scanning Data Stream...</div>
+    <h3>{{ r.title }}</h3>
+    <div class="price-tag">{{ r.price }}</div>
+    <a href="{{ r.link }}" target="_blank" class="btn-offer">View Offer</a>
+  </div>
+{% endfor %}
 </div>
 
 <script>
-const canvas = document.getElementById("particles-bg");
-const ctx = canvas.getContext("2d");
-let width, height;
+    const storeInput = document.getElementById('storeInput');
+    const cards = document.querySelectorAll('.card');
 
-function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-}
-window.addEventListener("resize", resize);
-resize();
-
-const particles = Array.from({ length: 100 }, () => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    dx: (Math.random() - 0.5) * 0.5,
-    dy: (Math.random() - 0.5) * 0.5,
-    size: Math.random() * 2,
-    alpha: Math.random() * 0.5 + 0.1
-}));
-
-function animate() {
-    ctx.clearRect(0, 0, width, height);
-    particles.forEach(p => {
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.x < 0) p.x = width;
-        if (p.x > width) p.x = 0;
-        if (p.y < 0) p.y = height;
-        if (p.y > height) p.y = 0;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(56, 189, 248, ${p.alpha})`; 
-        ctx.fill();
+    storeInput.addEventListener('input', function(e) {
+        const searchText = e.target.value.toLowerCase();
+        cards.forEach(card => {
+            const storeName = card.getAttribute('data-store');
+            if (storeName.includes(searchText) || searchText === '') {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
     });
-    requestAnimationFrame(animate);
-}
-animate();
-
-const form = document.querySelector('form');
-const hero = document.querySelector('.hero-container');
-const loader = document.getElementById('loader-overlay');
-const footer = document.querySelector('.footer-credit');
-
-form.addEventListener('submit', function(e) {
-    hero.classList.add('ui-zoom-out');
-    footer.style.opacity = '0';
-    loader.style.opacity = '1';
-    loader.style.pointerEvents = 'all';
-});
-
-window.addEventListener('pageshow', function() {
-    hero.classList.remove('ui-zoom-out');
-    loader.style.opacity = '0';
-    loader.style.pointerEvents = 'none';
-    footer.style.opacity = '0.7';
-});
 </script>
 
 </body>
