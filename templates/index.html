@@ -111,6 +111,27 @@ button:hover {
     box-shadow: 0 0 30px rgba(56, 189, 248, 0.7);
 }
 
+/* --- FOOTER CREDIT --- */
+.footer-credit {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    z-index: 10;
+    opacity: 0.7;
+    transition: 0.3s;
+}
+
+.footer-credit:hover {
+    opacity: 1;
+    color: #38bdf8;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
 /* --- TRANSITION: ZOOM OUT --- */
 .ui-zoom-out {
     transform: scale(2);
@@ -193,6 +214,10 @@ button:hover {
     </form>
 </div>
 
+<div class="footer-credit">
+    Made With ❤️ By Priyansu
+</div>
+
 <div id="loader-overlay">
     <div class="tunnel-circle"></div>
     <div class="tunnel-circle"></div>
@@ -249,16 +274,16 @@ animate();
 const form = document.querySelector('form');
 const hero = document.querySelector('.hero-container');
 const loader = document.getElementById('loader-overlay');
+const footer = document.querySelector('.footer-credit'); // Select footer
 
 form.addEventListener('submit', function(e) {
     // Zoom out the UI
     hero.classList.add('ui-zoom-out');
+    footer.style.opacity = '0'; // Hide footer during transition
     
     // Show the Warp Tunnel
     loader.style.opacity = '1';
     loader.style.pointerEvents = 'all';
-    
-    // The form will naturally submit and load the new page after this
 });
 
 // Restore state when pressing "Back" button
@@ -266,6 +291,7 @@ window.addEventListener('pageshow', function() {
     hero.classList.remove('ui-zoom-out');
     loader.style.opacity = '0';
     loader.style.pointerEvents = 'none';
+    footer.style.opacity = '0.7'; // Restore footer
 });
 </script>
 
