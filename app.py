@@ -1,16 +1,26 @@
+import os
+import requests
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-import requests
-import os
 
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
-app.config['SECRET_KEY'] = 'dev_key_123' 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+# Security: Get the secret key from environment or use a default for local testing
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_secret_key_12345')
+
+# Database Setup: Handle Render/Neon PostgreSQL connection
+database_url = os.environ.get('DATABASE_URL')
+
+# Fix for Render/Neon using 'postgres://' which SQLAlchemy requires to be 'postgresql://'
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+# Use the online DB if available, otherwise use local sqlite file
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -18,7 +28,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-SERP_API_KEY = os.getenv("SERP_API_KEY")
+# Get API Key from environment
+SERP_API_KEY = os.environ.get("SERP_API_KEY")
 
 # --- DATABASE MODELS ---
 class User(UserMixin, db.Model):
@@ -26,16 +37,17 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(150), unique=True, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
+    # Relationship to history
     history = db.relationship('SearchHistory', backref='user', lazy=True)
 
 class SearchHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    # RENAMED 'query' to 'search_query' to fix the error
+    # Renamed to 'search_query' to avoid conflict with SQLAlchemy .query method
     search_query = db.Column(db.String(200), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Create Tables
+# Create Database Tables
 with app.app_context():
     db.create_all()
 
@@ -70,20 +82,20 @@ def login():
     if request.method == "POST":
         action = request.form.get('action')
         
-        # REGISTER
+        # --- REGISTER LOGIC ---
         if action == 'register':
             username = request.form.get('username')
             email = request.form.get('email')
             password = request.form.get('password')
             
-            # Check for existing users to prevent crashes
+            # Check if User already exists (Prevents Crash)
             user_email = User.query.filter_by(email=email).first()
             user_name = User.query.filter_by(username=username).first()
 
             if user_email:
                 flash('Email already exists.', 'error')
             elif user_name:
-                flash('Username already exists.', 'error')
+                flash('Username already exists. Please choose another.', 'error')
             else:
                 hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
                 new_user = User(username=username, email=email, password=hashed_pw)
@@ -92,7 +104,7 @@ def login():
                 flash('Account created! Please sign in.', 'success')
                 return redirect(url_for('login'))
                 
-        # LOGIN
+        # --- LOGIN LOGIC ---
         elif action == 'login':
             username = request.form.get('username')
             password = request.form.get('password')
@@ -120,7 +132,7 @@ def index():
 @app.route("/account")
 @login_required
 def account():
-    # Fetch history
+    # Fetch history for current user, newest first
     user_history = SearchHistory.query.filter_by(user_id=current_user.id).order_by(SearchHistory.timestamp.desc()).all()
     return render_template("account.html", user=current_user, history=user_history)
 
@@ -131,6 +143,7 @@ def update_profile():
     new_email = request.form.get("email")
     new_password = request.form.get("password")
 
+    # Update fields if provided
     if new_username: current_user.username = new_username
     if new_email: current_user.email = new_email
     if new_password: 
@@ -140,7 +153,7 @@ def update_profile():
         db.session.commit()
         flash('Profile updated successfully!', 'success')
     except:
-        flash('Error updating profile. Username taken.', 'error')
+        flash('Error updating profile. Username or Email might be taken.', 'error')
     
     return redirect(url_for('account'))
 
@@ -150,8 +163,9 @@ def search():
     product = request.form.get("product")
     sort_order = request.form.get("sort")
 
-    # Save History (Using the new column name 'search_query')
+    # --- SAVE HISTORY ---
     if product:
+        # Using 'search_query' column name
         new_search = SearchHistory(user_id=current_user.id, search_query=product)
         db.session.add(new_search)
         db.session.commit()
@@ -168,7 +182,7 @@ def search():
         response = requests.get("https://serpapi.com/search", params=params)
         data = response.json()
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error fetching data: {e}")
         return render_template("index.html", error="Failed to fetch results", user=current_user)
 
     results = []
