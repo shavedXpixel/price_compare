@@ -9,26 +9,34 @@ from datetime import datetime
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
-# Security: Get the secret key from environment or use a default for local testing
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_secret_key_12345')
 
-# Database Setup: Handle Render/Neon PostgreSQL connection
-database_url = os.environ.get('DATABASE_URL')
+# 1. DATABASE CONNECTION
+# If you cannot get Environment Variables to work, paste your Neon connection string inside the quotes below.
+# Example: "postgres://neondb_owner:AbCd@ep-cool-frog.us-east-2.aws.neon.tech/neondb"
+NEON_DB_URL = "postgresql://neondb_owner:npg_WLq6Bc9dKowM@ep-weathered-smoke-ah05dveh.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 
-# Fix for Render/Neon using 'postgres://' which SQLAlchemy requires to be 'postgresql://'
+# Logic to choose the correct database:
+# 1. Tries to find 'DATABASE_URL' from Render Environment Variables.
+# 2. If not found, uses the 'NEON_DB_URL' you pasted above.
+# 3. If neither exists, falls back to a local 'users.db' file (for testing on laptop).
+database_url = os.environ.get('DATABASE_URL') or (NEON_DB_URL if "postgres" in NEON_DB_URL else 'sqlite:///users.db')
+
+# Fix for Render/Neon using 'postgres://' (SQLAlchemy needs 'postgresql://')
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-# Use the online DB if available, otherwise use local sqlite file
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# 2. SECURITY KEY
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_secret_key_12345')
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Get API Key from environment
+# 3. API KEY
 SERP_API_KEY = os.environ.get("SERP_API_KEY")
 
 # --- DATABASE MODELS ---
@@ -43,11 +51,10 @@ class User(UserMixin, db.Model):
 class SearchHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    # Renamed to 'search_query' to avoid conflict with SQLAlchemy .query method
     search_query = db.Column(db.String(200), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Create Database Tables
+# Create Database Tables automatically
 with app.app_context():
     db.create_all()
 
@@ -88,7 +95,7 @@ def login():
             email = request.form.get('email')
             password = request.form.get('password')
             
-            # Check if User already exists (Prevents Crash)
+            # Check if User exists to prevent crash
             user_email = User.query.filter_by(email=email).first()
             user_name = User.query.filter_by(username=username).first()
 
@@ -143,7 +150,6 @@ def update_profile():
     new_email = request.form.get("email")
     new_password = request.form.get("password")
 
-    # Update fields if provided
     if new_username: current_user.username = new_username
     if new_email: current_user.email = new_email
     if new_password: 
@@ -163,9 +169,8 @@ def search():
     product = request.form.get("product")
     sort_order = request.form.get("sort")
 
-    # --- SAVE HISTORY ---
+    # Save History
     if product:
-        # Using 'search_query' column name
         new_search = SearchHistory(user_id=current_user.id, search_query=product)
         db.session.add(new_search)
         db.session.commit()
