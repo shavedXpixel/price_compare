@@ -10,11 +10,15 @@ app = Flask(__name__)
 
 # --- CONFIGURATION ---
 
-# 1. OPTIONAL: Paste your Neon link here if Environment Variables fail
+# 1. PASTE YOUR SERPAPI KEY HERE 👇 (Crucial for search results!)
+SERP_API_KEY = "d66eccb121b3453152187f2442537b0fe5b3c82c4b8d4d56b89ed4d52c9f01a6"
+
+# 2. PASTE YOUR NEON DATABASE LINK HERE 👇 (Crucial for saving users!)
 # Example: "postgres://neondb_owner:AbCd@ep-cool-frog.us-east-2.aws.neon.tech/neondb"
 NEON_DB_URL = "postgresql://neondb_owner:npg_WLq6Bc9dKowM@ep-weathered-smoke-ah05dveh.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require" 
 
-# 2. Database Logic
+
+# --- DATABASE SETUP LOGIC ---
 # First, look for Render's built-in DATABASE_URL. 
 # If not found, check if you pasted a link in NEON_DB_URL.
 # If neither exists, fall back to a local 'users.db' file.
@@ -37,8 +41,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-SERP_API_KEY = os.environ.get("SERP_API_KEY")
-
 # --- DATABASE MODELS ---
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -50,7 +52,7 @@ class User(UserMixin, db.Model):
 class SearchHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    # FIX: Renamed 'query' to 'search_query' to prevent the AttributeError crash
+    # Renamed to 'search_query' to prevent crashes
     search_query = db.Column(db.String(200), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -138,7 +140,7 @@ def index():
 @app.route("/account")
 @login_required
 def account():
-    # Fetch history using the new logic
+    # Fetch history using the new column name
     user_history = SearchHistory.query.filter_by(user_id=current_user.id).order_by(SearchHistory.timestamp.desc()).all()
     return render_template("account.html", user=current_user, history=user_history)
 
@@ -168,7 +170,7 @@ def search():
     product = request.form.get("product")
     sort_order = request.form.get("sort")
 
-    # SAVE HISTORY (Updated to use 'search_query')
+    # SAVE HISTORY (using 'search_query' column)
     if product:
         new_search = SearchHistory(user_id=current_user.id, search_query=product)
         db.session.add(new_search)
