@@ -10,25 +10,25 @@ app = Flask(__name__)
 
 # --- CONFIGURATION ---
 
-# 1. PASTE YOUR SERPAPI KEY HERE 👇 (Crucial for search results!)
+# 1. PASTE YOUR SERPAPI KEY HERE 👇
 SERP_API_KEY = "d66eccb121b3453152187f2442537b0fe5b3c82c4b8d4d56b89ed4d52c9f01a6"
 
-# 2. PASTE YOUR NEON DATABASE LINK HERE 👇 (Crucial for saving users!)
-# Example: "postgres://neondb_owner:AbCd@ep-cool-frog.us-east-2.aws.neon.tech/neondb"
-NEON_DB_URL = "postgresql://neondb_owner:npg_WLq6Bc9dKowM@ep-weathered-smoke-ah05dveh.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require" 
+# 2. PASTE YOUR NEW SUPABASE LINK HERE 👇
+# Replace [YOUR-PASSWORD] with the actual password you typed!
+# Example: "postgresql://postgres:MyPass123@db.xyz.supabase.co:5432/postgres"
+SUPABASE_DB_URL = "postgresql://postgres.dqndrkyherascrrhejih:Dashpriyansu@2006@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres"
 
 
-# --- DATABASE SETUP LOGIC ---
-# First, look for Render's built-in DATABASE_URL. 
-# If not found, check if you pasted a link in NEON_DB_URL.
-# If neither exists, fall back to a local 'users.db' file.
+# --- DATABASE CONNECTION LOGIC ---
 database_url = os.environ.get('DATABASE_URL')
-if not database_url and "postgres" in NEON_DB_URL:
-    database_url = NEON_DB_URL
+# If on Render, use the environment variable. If not, use the hardcoded Supabase link.
+if not database_url and "postgres" in SUPABASE_DB_URL:
+    database_url = SUPABASE_DB_URL
+# Fallback to local file if nothing else works
 if not database_url:
     database_url = 'sqlite:///users.db'
 
-# Fix for Render/Neon using 'postgres://' (SQLAlchemy needs 'postgresql://')
+# Fix for some postgres links starting with "postgres://" instead of "postgresql://"
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
@@ -52,7 +52,7 @@ class User(UserMixin, db.Model):
 class SearchHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    # Renamed to 'search_query' to prevent crashes
+    # Using the fixed column name 'search_query'
     search_query = db.Column(db.String(200), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -140,7 +140,7 @@ def index():
 @app.route("/account")
 @login_required
 def account():
-    # Fetch history using the new column name
+    # Fetch history using 'search_query'
     user_history = SearchHistory.query.filter_by(user_id=current_user.id).order_by(SearchHistory.timestamp.desc()).all()
     return render_template("account.html", user=current_user, history=user_history)
 
@@ -170,7 +170,7 @@ def search():
     product = request.form.get("product")
     sort_order = request.form.get("sort")
 
-    # SAVE HISTORY (using 'search_query' column)
+    # SAVE HISTORY
     if product:
         new_search = SearchHistory(user_id=current_user.id, search_query=product)
         db.session.add(new_search)
