@@ -4,130 +4,160 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Future Shop</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Base Styles - Futuristic Dark Theme */
+        /* --- 1. ANIMATED BACKGROUND --- */
         body {
-            background: #020617; /* Dark, futuristic background */
-            color: white;
-            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
             overflow: hidden;
+            background: linear-gradient(-45deg, #020617, #1e1b4b, #0f172a, #312e81);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
         }
 
-        /* The Card Container - Holographic Effect */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- 2. GLASSMORPHISM CARD --- */
         .card {
-            background: rgba(30, 41, 59, 0.4); /* Semi-transparent glass */
-            border: 2px solid transparent;
-            border-image: linear-gradient(135deg, #0284c7, #38bdf8, #a855f7, #ec4899) 1; /* Gradient border */
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 0 40px rgba(2, 132, 199, 0.3), 0 0 20px rgba(168, 85, 247, 0.3); /* Glowing effect */
-            
-            /* 2. RESPONSIVE SIZING */
-            width: 90%;          /* Take up 90% of small screens */
-            max-width: 400px;    /* But never get wider than 400px on big screens */
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 380px;
             text-align: center;
-            position: relative;
-            z-index: 1;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            animation: float 6s ease-in-out infinite;
         }
 
-        /* Subtle glow behind the card */
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, rgba(168, 85, 247, 0.1) 50%, transparent 70%);
-            transform: translate(-50%, -50%);
-            filter: blur(50px);
-            z-index: -1;
-            pointer-events: none;
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
 
         h2 {
-            color: #38bdf8;
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-            text-shadow: 0 0 10px #38bdf8;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2rem;
+            background: linear-gradient(to right, #38bdf8, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
         }
 
-        input {
+        /* --- 3. MODERN INPUT FIELDS --- */
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .input-group input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
+            padding: 15px 15px 15px 45px; /* Space for icon */
             background: rgba(15, 23, 42, 0.6);
-            border: 1px solid #334155;
-            border-radius: 8px;
+            border: 2px solid rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
             color: white;
-            box-sizing: border-box; /* Keeps padding inside the width */
-            font-size: 1rem; /* Readable on mobile */
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .input-group input:focus {
+            border-color: #38bdf8;
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        /* Icons inside inputs (Simulated with CSS) */
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.2rem;
             transition: 0.3s;
         }
 
-        input:focus {
-            outline: none;
-            border-color: #38bdf8;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+        .input-group input:focus + .input-icon {
+            color: #38bdf8;
         }
 
+        /* --- 4. GLOWING BUTTON --- */
         button {
             width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            background: linear-gradient(135deg, #0284c7, #38bdf8, #a855f7);
+            padding: 15px;
+            background: linear-gradient(135deg, #0284c7, #7c3aed);
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             color: white;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            font-size: 1rem;
-            transition: 0.3s;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+            margin-top: 10px;
         }
 
         button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.8), 0 0 30px rgba(168, 85, 247, 0.8);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
         }
 
-        /* Toggle Links (Login vs Register) */
+        /* Toggle Text */
         .toggle-link {
-            margin-top: 20px;
+            margin-top: 25px;
             font-size: 0.9rem;
-            color: #94a3b8;
+            color: #cbd5e1;
         }
+        
         .toggle-link span {
             color: #38bdf8;
             cursor: pointer;
-            text-decoration: underline;
-            transition: 0.3s;
+            font-weight: 600;
+            transition: 0.2s;
+            text-decoration: none;
         }
+        
         .toggle-link span:hover {
             color: #a855f7;
-            text-shadow: 0 0 5px #a855f7;
+            text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
         }
 
-        /* Flash Messages */
-        .flash {
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-        }
-        .flash.success { background: rgba(34, 197, 94, 0.2); color: #4ade80; box-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
-        .flash.error { background: rgba(248, 113, 113, 0.2); color: #f87171; box-shadow: 0 0 10px rgba(248, 113, 113, 0.3); }
-
-        /* Hide sections by default */
+        /* Helpers */
         .hidden { display: none; }
+        
+        .flash {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            animation: fadeIn 0.5s ease;
+        }
+        .flash.success { background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #86efac; }
+        .flash.error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -146,26 +176,50 @@
         <h2>Welcome Back</h2>
         <form action="/login" method="POST">
             <input type="hidden" name="action" value="login">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Log In</button>
+            
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Username" required autocomplete="off">
+                <span class="input-icon">👤</span>
+            </div>
+
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Password" required>
+                <span class="input-icon">🔒</span>
+            </div>
+
+            <button type="submit">Unlock Access</button>
         </form>
+        
         <div class="toggle-link">
-            New here? <span onclick="toggleForms()">Create an Account</span>
+            First time here? <span onclick="toggleForms()">Initialize Account</span>
         </div>
     </div>
 
     <div id="register-section" class="hidden">
-        <h2>Create Account</h2>
+        <h2>New Pilot</h2>
         <form action="/login" method="POST">
             <input type="hidden" name="action" value="register">
-            <input type="text" name="username" placeholder="Choose a Username" required>
-            <input type="email" name="email" placeholder="Email Address" required>
-            <input type="password" name="password" placeholder="Choose a Password" required>
-            <button type="submit">Sign Up</button>
+            
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Choose Callsign" required autocomplete="off">
+                <span class="input-icon">🆔</span>
+            </div>
+
+            <div class="input-group">
+                <input type="email" name="email" placeholder="Comms Email" required autocomplete="off">
+                <span class="input-icon">📧</span>
+            </div>
+
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Set Passcode" required>
+                <span class="input-icon">🔑</span>
+            </div>
+
+            <button type="submit">Launch Profile</button>
         </form>
+        
         <div class="toggle-link">
-            Already have an account? <span onclick="toggleForms()">Log In</span>
+            Already registered? <span onclick="toggleForms()">Return to Login</span>
         </div>
     </div>
 
@@ -173,16 +227,25 @@
 
 <script>
     function toggleForms() {
-        var login = document.getElementById("login-section");
-        var register = document.getElementById("register-section");
+        const login = document.getElementById("login-section");
+        const register = document.getElementById("register-section");
+        const title = document.querySelector('h2');
 
-        if (login.classList.contains("hidden")) {
-            login.classList.remove("hidden");
-            register.classList.add("hidden");
-        } else {
-            login.classList.add("hidden");
-            register.classList.remove("hidden");
-        }
+        // Simple fade transition effect
+        login.style.opacity = '0';
+        register.style.opacity = '0';
+
+        setTimeout(() => {
+            if (login.classList.contains("hidden")) {
+                login.classList.remove("hidden");
+                register.classList.add("hidden");
+                setTimeout(() => login.style.opacity = '1', 50);
+            } else {
+                login.classList.add("hidden");
+                register.classList.remove("hidden");
+                setTimeout(() => register.style.opacity = '1', 50);
+            }
+        }, 200);
     }
 </script>
 
