@@ -10,172 +10,68 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <style>
-        /* --- CSS STYLES (Paste this directly in head) --- */
+        /* --- CSS STYLES --- */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #0f172a; /* Dark Navy Background */
-            overflow: hidden;
-            color: white;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow: hidden; color: white;
+            background: #000; /* Fallback color */
         }
 
-        /* Animated Background Blobs */
-        .background-container {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden; z-index: -1;
-        }
-
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            animation: float 10s infinite alternate;
-        }
-        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #7c3aed; }
-        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: #2563eb; animation-delay: -5s; }
-        .blob-3 { top: 40%; left: 40%; width: 300px; height: 300px; background: #db2777; animation-duration: 15s; }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, -30px) scale(1.1); }
+        /* --- VIDEO BACKGROUND --- */
+        #bg-video {
+            position: fixed; right: 0; bottom: 0;
+            min-width: 100%; min-height: 100%;
+            z-index: -1; /* Puts video BEHIND everything */
+            object-fit: cover; /* Ensures it covers the screen */
+            filter: brightness(0.6); /* Darkens video so text is readable */
         }
 
         /* Glassmorphism Card */
         .wrapper {
-            position: relative;
-            width: 400px;
-            min-height: 500px;
-            background: rgba(255, 255, 255, 0.05);
+            position: relative; width: 400px; min-height: 500px;
+            background: rgba(255, 255, 255, 0.05); /* Slight transparency */
             border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(15px); /* Blurs the video behind the card */
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            transition: height 0.3s ease;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; transition: height 0.3s ease;
         }
 
-        .form-box {
-            width: 100%;
-            padding: 40px;
-            display: flex; /* Ensure content is visible */
-            flex-direction: column;
-        }
+        .form-box { width: 100%; padding: 40px; display: flex; flex-direction: column; }
+        h2 { font-size: 2em; color: #fff; text-align: center; margin-bottom: 30px; }
 
-        h2 {
-            font-size: 2em;
-            color: #fff;
-            text-align: center;
-            margin-bottom: 30px;
-        }
+        /* Input Styles */
+        .input-box { position: relative; width: 100%; height: 50px; border-bottom: 2px solid #fff; margin: 30px 0; }
+        .input-box label { position: absolute; top: 50%; left: 5px; transform: translateY(-50%); font-size: 1em; color: #fff; pointer-events: none; transition: .5s; }
+        .input-box input:focus ~ label, .input-box input:valid ~ label { top: -5px; color: #38bdf8; }
+        .input-box input { width: 100%; height: 100%; background: transparent; border: none; outline: none; font-size: 1em; color: #fff; padding: 0 35px 0 5px; }
+        .input-box .icon { position: absolute; right: 8px; font-size: 1.2em; color: #fff; line-height: 57px; }
 
-        .input-box {
-            position: relative;
-            width: 100%;
-            height: 50px;
-            border-bottom: 2px solid #fff;
-            margin: 30px 0;
-        }
-
-        .input-box label {
-            position: absolute;
-            top: 50%; left: 5px;
-            transform: translateY(-50%);
-            font-size: 1em;
-            color: #fff;
-            pointer-events: none;
-            transition: .5s;
-        }
-
-        .input-box input:focus ~ label,
-        .input-box input:valid ~ label {
-            top: -5px;
-            color: #38bdf8;
-        }
-
-        .input-box input {
-            width: 100%; height: 100%;
-            background: transparent;
-            border: none; outline: none;
-            font-size: 1em; color: #fff;
-            padding: 0 35px 0 5px;
-        }
-
-        .input-box .icon {
-            position: absolute; right: 8px;
-            font-size: 1.2em; color: #fff;
-            line-height: 57px;
-        }
-
-        button {
-            width: 100%; height: 45px;
-            background: #fff; border: none;
-            border-radius: 6px; cursor: pointer;
-            font-size: 1em; color: #333;
-            font-weight: 600; transition: 0.3s;
-        }
-
-        button:hover {
-            background: #38bdf8; color: #fff;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
-        }
-
-        .register-link, .login-register {
-            font-size: .9em; color: #fff;
-            text-align: center; margin: 25px 0 10px;
-        }
-        
-        .register-link a, .login-register a {
-            color: #fff; text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .register-link a:hover, .login-register a:hover {
-            text-decoration: underline; color: #38bdf8;
-        }
-        
-        .remember-forgot {
-            display: flex; justify-content: space-between;
-            font-size: 0.9em; margin-bottom: 15px;
-        }
+        /* Buttons & Links */
+        button { width: 100%; height: 45px; background: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; color: #333; font-weight: 600; transition: 0.3s; }
+        button:hover { background: #38bdf8; color: #fff; box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
+        .register-link, .login-register { font-size: .9em; color: #fff; text-align: center; margin: 25px 0 10px; }
+        .register-link a, .login-register a { color: #fff; text-decoration: none; font-weight: 600; }
+        .register-link a:hover, .login-register a:hover { text-decoration: underline; color: #38bdf8; }
+        .remember-forgot { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 15px; }
         .remember-forgot a { color: white; text-decoration: none; }
         .remember-forgot a:hover { text-decoration: underline; }
 
         /* Flash Messages */
-        .flash-container {
-            position: absolute; top: 10px; width: 100%;
-            display: flex; justify-content: center; z-index: 100;
-        }
-        .flash {
-            padding: 10px 20px; border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);
-            color: white; margin-bottom: 10px;
-        }
+        .flash-container { position: absolute; top: 10px; width: 100%; display: flex; justify-content: center; z-index: 100; }
+        .flash { padding: 10px 20px; border-radius: 8px; background: rgba(0, 0, 0, 0.6); color: white; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.3); }
     </style>
 </head>
 <body>
 
-    <div class="background-container">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
+    <video autoplay muted loop id="bg-video">
+        <source src="{{ url_for('static', filename='bg-video.mp4') }}" type="video/mp4">
+    </video>
 
     <div class="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -257,7 +153,7 @@
     </div>
 
     <script>
-        // --- JAVASCRIPT ANIMATIONS (Paste this directly here) ---
+        // --- ANIMATIONS ---
         document.addEventListener("DOMContentLoaded", () => {
             const wrapper = document.querySelector('.wrapper');
             const loginBox = document.querySelector('.form-box.login');
@@ -265,33 +161,22 @@
             const registerBtn = document.querySelector('.register-btn');
             const loginBtn = document.querySelector('.login-btn');
 
-            // 1. Initial Float In Animation
+            // Float In Animation
             gsap.from(".wrapper", { duration: 1.5, y: 100, opacity: 0, ease: "power4.out" });
-            gsap.from(".blob", { duration: 2, scale: 0, opacity: 0, stagger: 0.2, ease: "elastic.out(1, 0.5)" });
 
-            // 2. Switch to Register
+            // Switch to Register
             registerBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                // Fade out Login
                 gsap.to(loginBox, { duration: 0.5, x: -50, opacity: 0, display: 'none', onComplete: () => {
-                    // Fade in Register
-                    gsap.fromTo(registerBox, 
-                        { x: 50, opacity: 0, display: 'flex' }, 
-                        { x: 0, opacity: 1, duration: 0.5 }
-                    );
+                    gsap.fromTo(registerBox, { x: 50, opacity: 0, display: 'flex' }, { x: 0, opacity: 1, duration: 0.5 });
                 }});
             });
 
-            // 3. Switch to Login
+            // Switch to Login
             loginBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                // Fade out Register
                 gsap.to(registerBox, { duration: 0.5, x: 50, opacity: 0, display: 'none', onComplete: () => {
-                    // Fade in Login
-                    gsap.fromTo(loginBox, 
-                        { x: -50, opacity: 0, display: 'flex' }, 
-                        { x: 0, opacity: 1, duration: 0.5 }
-                    );
+                    gsap.fromTo(loginBox, { x: -50, opacity: 0, display: 'flex' }, { x: 0, opacity: 1, duration: 0.5 });
                 }});
             });
         });
