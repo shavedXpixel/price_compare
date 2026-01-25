@@ -3,360 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Future Access | Login</title>
-    
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
-    <style>
-        /* --- CSS STYLES --- */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #0f172a; /* Dark Navy Background */
-            overflow: hidden;
-        }
-
-        /* --- Animated Background Blobs --- */
-        .background-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -1;
-        }
-
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            animation: float 10s infinite alternate;
-        }
-
-        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #7c3aed; /* Purple */ }
-        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: #2563eb; /* Blue */ animation-delay: -5s; }
-        .blob-3 { top: 40%; left: 40%; width: 300px; height: 300px; background: #db2777; /* Pink */ animation-duration: 15s; }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, -30px) scale(1.1); }
-        }
-
-        /* --- Glassmorphism Card --- */
-        .wrapper {
-            position: relative;
-            width: 400px;
-            height: 500px; /* Fixed height for smooth transitions */
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            transition: height .2s ease;
-        }
-
-        .form-box {
-            width: 100%;
-            padding: 40px;
-        }
-
-        .form-box h2 {
-            font-size: 2em;
-            color: #fff;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        /* --- Inputs --- */
-        .input-box {
-            position: relative;
-            width: 100%;
-            height: 50px;
-            border-bottom: 2px solid #fff;
-            margin: 30px 0;
-        }
-
-        .input-box label {
-            position: absolute;
-            top: 50%;
-            left: 5px;
-            transform: translateY(-50%);
-            font-size: 1em;
-            color: #fff;
-            pointer-events: none;
-            transition: .5s;
-        }
-
-        /* Float label when focused or has content */
-        .input-box input:focus ~ label,
-        .input-box input:valid ~ label {
-            top: -5px;
-            color: #38bdf8; /* Light Blue focus color */
-        }
-
-        .input-box input {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-size: 1em;
-            color: #fff;
-            padding: 0 35px 0 5px;
-        }
-
-        .input-box .icon {
-            position: absolute;
-            right: 8px;
-            font-size: 1.2em;
-            color: #fff;
-            line-height: 57px;
-        }
-
-        /* --- Buttons & Links --- */
-        .remember-forgot {
-            font-size: .9em;
-            color: #fff;
-            font-weight: 500;
-            margin: -15px 0 15px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .remember-forgot label input {
-            accent-color: #fff;
-            margin-right: 3px;
-        }
-
-        .remember-forgot a {
-            color: #fff;
-            text-decoration: none;
-        }
-
-        .remember-forgot a:hover {
-            text-decoration: underline;
-        }
-
-        .btn {
-            width: 100%;
-            height: 45px;
-            background: #fff;
-            border: none;
-            outline: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1em;
-            color: #333;
-            font-weight: 600;
-            transition: 0.3s;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-        }
-
-        .btn:hover {
-            background: #38bdf8;
-            color: #fff;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
-        }
-
-        .login-register {
-            font-size: .9em;
-            color: #fff;
-            text-align: center;
-            font-weight: 500;
-            margin: 25px 0 10px;
-        }
-
-        .login-register p a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .login-register p a:hover {
-            text-decoration: underline;
-            color: #38bdf8;
-        }
-        
-        /* Flash Message Styling */
-        .flash {
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-            text-align: center;
-            width: 100%;
-            display: block;
-        }
-        .flash.success { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid #22c55e; }
-        .flash.error { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
-    </style>
+    <title>Login - Future Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <div class="background-container">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
-
-    <div class="wrapper" id="glass-card">
+    <div class="wrapper">
         
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div style="position: absolute; top: 10px; width: 80%; z-index: 10;">
+                <div style="position: absolute; top: 20px; z-index: 100;">
                 {% for category, message in messages %}
-                    <div class="flash {{ category }}">{{ message }}</div>
+                    <div style="background: rgba(255,0,0,0.7); color: white; padding: 10px 20px; border-radius: 5px; margin-bottom: 10px; backdrop-filter: blur(5px);">
+                        {{ message }}
+                    </div>
                 {% endfor %}
                 </div>
             {% endif %}
         {% endwith %}
 
         <div class="form-box login">
-            <h2>Welcome Back</h2>
             <form action="/login" method="POST">
                 <input type="hidden" name="action" value="login">
-                
+                <h2>Login</h2>
+        
                 <div class="input-box">
-                    <span class="icon"><ion-icon name="person"></ion-icon></span>
-                    <input type="text" name="username" required autocomplete="off">
+                    <span class="icon">
+                        <ion-icon name="person"></ion-icon>
+                    </span>
+                    <input type="text" name="username" required>
                     <label>Username</label>
                 </div>
+        
                 <div class="input-box">
-                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <span class="icon">
+                        <ion-icon name="lock-closed"></ion-icon>
+                    </span>
                     <input type="password" name="password" required>
                     <label>Password</label>
                 </div>
+        
                 <div class="remember-forgot">
                     <label><input type="checkbox"> Remember me</label>
                     <a href="/reset_password">Forgot Password?</a>
                 </div>
-                <button type="submit" class="btn">Login</button>
-                <div class="login-register">
-                    <p>Don't have an account? <a href="#" class="register-link">Register</a></p>
+        
+                <button type="submit">Login</button>
+        
+                <div class="register-link">
+                    <p>Don't have an account? <a href="#" class="register-btn">Register</a></p>
                 </div>
             </form>
         </div>
 
         <div class="form-box register" style="display: none;">
-            <h2>Create Account</h2>
             <form action="/login" method="POST">
                 <input type="hidden" name="action" value="register">
-
+                <h2>Registration</h2>
+        
                 <div class="input-box">
-                    <span class="icon"><ion-icon name="person"></ion-icon></span>
-                    <input type="text" name="username" required autocomplete="off">
+                    <span class="icon">
+                        <ion-icon name="person"></ion-icon>
+                    </span>
+                    <input type="text" name="username" required>
                     <label>Username</label>
                 </div>
+
                 <div class="input-box">
-                    <span class="icon"><ion-icon name="mail"></ion-icon></span>
-                    <input type="email" name="email" required autocomplete="off">
+                    <span class="icon">
+                        <ion-icon name="mail"></ion-icon>
+                    </span>
+                    <input type="email" name="email" required>
                     <label>Email</label>
                 </div>
+        
                 <div class="input-box">
-                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <span class="icon">
+                        <ion-icon name="lock-closed"></ion-icon>
+                    </span>
                     <input type="password" name="password" required>
                     <label>Password</label>
                 </div>
+        
                 <div class="remember-forgot">
-                    <label><input type="checkbox" required> I agree to the terms</label>
+                    <label><input type="checkbox" required> I agree to the terms & conditions</label>
                 </div>
-                <button type="submit" class="btn">Register</button>
-                <div class="login-register">
-                    <p>Already have an account? <a href="#" class="login-link">Login</a></p>
+        
+                <button type="submit">Register</button>
+        
+                <div class="register-link">
+                    <p>Already have an account? <a href="#" class="login-btn">Login</a></p>
                 </div>
             </form>
         </div>
+      
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const wrapper = document.querySelector('.wrapper');
-            const loginLink = document.querySelector('.login-link');
-            const registerLink = document.querySelector('.register-link');
-            const loginForm = document.querySelector('.form-box.login');
-            const registerForm = document.querySelector('.form-box.register');
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
-            // 1. Initial Entry Animation (Cinematic float-in)
-            gsap.from(".wrapper", {
-                duration: 1.5,
-                y: 100,
-                opacity: 0,
-                ease: "power4.out"
-            });
-
-            gsap.from(".blob", {
-                duration: 2,
-                scale: 0,
-                opacity: 0,
-                stagger: 0.2,
-                ease: "elastic.out(1, 0.5)"
-            });
-
-            // 2. Switch to Register Mode
-            registerLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                // Animate Login Out
-                gsap.to(loginForm, {
-                    duration: 0.5,
-                    x: -300,
-                    opacity: 0,
-                    display: "none",
-                    ease: "power2.in",
-                    onComplete: () => {
-                        // Animate Register In
-                        gsap.fromTo(registerForm, 
-                            { x: 300, opacity: 0, display: "block" },
-                            { x: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
-                        );
-                        // Expand Card Height
-                        gsap.to(wrapper, { height: "580px", duration: 0.3 });
-                    }
-                });
-            });
-
-            // 3. Switch to Login Mode
-            loginLink.addEventListener('click', (e) => {
-                e.preventDefault();
-
-                // Animate Register Out
-                gsap.to(registerForm, {
-                    duration: 0.5,
-                    x: 300,
-                    opacity: 0,
-                    display: "none",
-                    ease: "power2.in",
-                    onComplete: () => {
-                        // Animate Login In
-                        gsap.fromTo(loginForm, 
-                            { x: -300, opacity: 0, display: "block" },
-                            { x: 0, opacity: 1, duration: 0.5, ease: "power2.out" }
-                        );
-                        // Reset Card Height
-                        gsap.to(wrapper, { height: "500px", duration: 0.3 });
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 </html>
