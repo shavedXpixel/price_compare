@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer as Serializer
+import traceback
 
 app = Flask(__name__)
 
@@ -14,26 +15,27 @@ app = Flask(__name__)
 SERP_API_KEY = "d66eccb121b3453152187f2442537b0fe5b3c82c4b8d4d56b89ed4d52c9f01a6"
 
 # --- 2. EMAIL CONFIGURATION (For Password Reset) ---
-# Use your Gmail and the 16-char App Password
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'pupuhari123@gmail.com' 
-app.config['MAIL_PASSWORD'] = 'flfl rpac nsqz wprl' 
+app.config['MAIL_USERNAME'] = 'pupuhari123@gmail.com'
+# We remove spaces from the app password to ensure it works correctly
+app.config['MAIL_PASSWORD'] = 'flfl rpac nsqz wprl'.replace(" ", "")
 
 # --- 3. DATABASE CONFIGURATION (Neon) ---
-NEON_DB_URL = "postgresql://neondb_owner:npg_d3OshXYJxvl6@ep-misty-hat-a1bla5w6.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require" 
+NEON_DB_URL = "postgresql://neondb_owner:npg_d3OshXYJxvl6@ep-misty-hat-a1bla5w6.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 
 
 # --- DATABASE CONNECTION LOGIC ---
 database_url = os.environ.get('DATABASE_URL')
 
+# Priority: Render DB -> Neon DB -> Local SQLite
 if not database_url and "neon" in NEON_DB_URL:
     database_url = NEON_DB_URL
 elif not database_url:
     database_url = 'sqlite:///users.db'
 
-# Fix for Render/Neon using 'postgres://' instead of 'postgresql://'
+# Fix for SQLAlchemy requiring 'postgresql://' instead of 'postgres://'
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
@@ -105,11 +107,11 @@ If you did not request this, please ignore this email.
     # --- SAFE SENDING BLOCK (Prevents Internal Server Error) ---
     try:
         mail.send(msg)
+        print(f"Email sent successfully to {user.email}")
     except Exception as e:
         print(f"\n\n!!! EMAIL FAILED TO SEND !!!")
         print(f"ERROR: {e}")
-        print("Check your App Password in app.py")
-        print(f"MANUAL LINK FOR TESTING: {link}\n\n")
+        print(f"MANUAL LINK FOR TESTING (Copy this if email fails): {link}\n\n")
         # We don't crash, we just let the user know something went wrong in logs
 
 def get_logo(store):
@@ -178,14 +180,25 @@ def login():
 def reset_request():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
+        
     if request.method == 'POST':
-        email = request.form.get('email')
-        user = User.query.filter_by(email=email).first()
-        if user:
-            send_reset_email(user)
-        # Always show success to prevent email guessing
-        flash('If that email exists, a reset link has been sent.', 'success')
-        return redirect(url_for('login'))
+        try:
+            email = request.form.get('email')
+            user = User.query.filter_by(email=email).first()
+            if user:
+                send_reset_email(user)
+                flash('An email has been sent with instructions to reset your password.', 'success')
+            else:
+                # We show the same message for security reasons
+                flash('If that email exists, a reset link has been sent.', 'success')
+            return redirect(url_for('login'))
+            
+        except Exception as e:
+            # If something crashes, we catch it here
+            print(f"CRITICAL ERROR in reset_request: {e}")
+            flash('An error occurred. Please check server logs.', 'error')
+            return redirect(url_for('login'))
+            
     return render_template('reset_request.html')
 
 @app.route("/reset_password/<token>", methods=['GET', 'POST'])
