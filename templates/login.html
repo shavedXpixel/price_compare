@@ -85,7 +85,7 @@
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
         }
 
-        /* Icons inside inputs (Simulated with CSS) */
+        /* Icons inside inputs */
         .input-icon {
             position: absolute;
             left: 15px;
@@ -121,7 +121,7 @@
             box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
         }
 
-        /* Toggle Text */
+        /* Toggle Text & Forgot Password */
         .toggle-link {
             margin-top: 25px;
             font-size: 0.9rem;
@@ -139,6 +139,18 @@
         .toggle-link span:hover {
             color: #a855f7;
             text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+        }
+
+        .forgot-link {
+            display: block;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .forgot-link:hover {
+            color: #38bdf8;
         }
 
         /* Helpers */
@@ -189,6 +201,8 @@
 
             <button type="submit">Unlock Access</button>
         </form>
+        
+        <a href="/reset_password" class="forgot-link">Forgot Password?</a>
         
         <div class="toggle-link">
             First time here? <span onclick="toggleForms()">Initialize Account</span>
