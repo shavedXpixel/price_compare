@@ -29,22 +29,23 @@
 
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
 
-        /* --- HEADER AREA --- */
+        /* --- HEADER --- */
         .results-header {
             padding: 30px 50px;
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(31, 36, 45, 0.8); backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 238, 255, 0.2);
+            background: rgba(31, 36, 45, 0.9); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--main-color);
             position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
         }
 
         .results-header h1 { font-size: 1.5rem; }
-        .results-header span { color: var(--main-color); }
+        .results-header span { color: var(--main-color); text-shadow: 0 0 10px var(--main-color); }
 
         .controls form { display: flex; gap: 10px; }
         
         .sort-select {
-            padding: 8px 15px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--main-color);
+            padding: 8px 15px; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--main-color);
             color: var(--text-color); border-radius: 5px; cursor: pointer; outline: none;
         }
         
@@ -65,38 +66,50 @@
 
         /* --- PRODUCT CARD --- */
         .product-card {
-            background: rgba(31, 36, 45, 0.7);
-            border: 1px solid rgba(0, 238, 255, 0.1);
+            background: var(--second-bg); /* Solid color to ensure visibility */
+            border: 2px solid rgba(0, 238, 255, 0.1);
             border-radius: 15px; padding: 20px;
-            backdrop-filter: blur(5px);
             transition: 0.3s; position: relative; overflow: hidden;
             display: flex; flex-direction: column; justify-content: space-between;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            /* Removed opacity: 0 to fix visibility issues */
         }
 
         .product-card:hover {
             transform: translateY(-10px);
             border-color: var(--main-color);
-            box-shadow: 0 0 20px rgba(0, 238, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.4);
         }
 
+        /* IMAGE CONTAINER */
         .img-container {
             width: 100%; height: 200px; display: flex; justify-content: center; align-items: center;
             background: #fff; border-radius: 10px; margin-bottom: 15px; padding: 10px;
+            position: relative;
         }
         .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        .store-logo {
+        /* STORE BADGE (Replaces Broken Logo) */
+        .store-badge {
             position: absolute; top: 10px; right: 10px;
-            width: 40px; height: 40px; border-radius: 50%;
-            background: white; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background: var(--main-color); color: var(--bg-color);
+            font-size: 0.8rem; font-weight: bold; padding: 4px 10px;
+            border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            z-index: 10;
         }
 
-        .product-title { font-size: 1rem; margin-bottom: 10px; line-height: 1.4; height: 45px; overflow: hidden; }
+        .product-title { 
+            font-size: 1rem; margin-bottom: 10px; line-height: 1.4; 
+            height: 45px; overflow: hidden; color: #fff;
+        }
         
-        .price-tag { font-size: 1.5rem; color: var(--main-color); font-weight: 700; margin-bottom: 15px; }
+        .price-tag { 
+            font-size: 1.5rem; color: var(--main-color); font-weight: 700; margin-bottom: 15px; 
+            text-shadow: 0 0 5px rgba(0, 238, 255, 0.3);
+        }
 
         .view-btn {
-            width: 100%; padding: 10px; text-align: center;
+            width: 100%; padding: 12px; text-align: center;
             background: transparent; border: 2px solid var(--main-color);
             color: var(--text-color); border-radius: 8px; font-weight: 600; text-decoration: none;
             transition: 0.3s;
@@ -106,9 +119,9 @@
         /* --- FOOTER --- */
         .footer-info {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(31, 36, 45, 0.9); padding: 10px;
+            background: rgba(31, 36, 45, 0.95); padding: 10px;
             text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6);
-            z-index: 10; border-top: 1px solid rgba(0, 238, 255, 0.1);
+            z-index: 10; border-top: 1px solid var(--main-color);
         }
         .highlight { color: var(--main-color); font-weight: bold; }
     </style>
@@ -138,10 +151,10 @@
         {% if results %}
             {% for item in results %}
             <div class="product-card">
-                <img src="{{ url_for('static', filename=item.logo) }}" class="store-logo" alt="{{ item.store }}">
+                <span class="store-badge">{{ item.store }}</span>
                 
                 <div class="img-container">
-                    <img src="{{ item.thumbnail }}" alt="Product Image">
+                    <img src="{{ item.thumbnail }}" alt="Product Image" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">
                 </div>
                 
                 <div>
@@ -154,8 +167,8 @@
             {% endfor %}
         {% else %}
             <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
-                <h2>No results found.</h2>
-                <p>Try searching for something else!</p>
+                <h2 style="color: #888;">No results found.</h2>
+                <p style="color: #666;">Try searching for "iPhone 15", "Laptop", or "Nike Shoes".</p>
             </div>
         {% endif %}
     </div>
@@ -167,7 +180,7 @@
     </div>
 
     <script>
-        // Background Animation
+        // Geometric Background Animation
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -219,11 +232,6 @@
             requestAnimationFrame(animate);
         }
         animate();
-
-        // Staggered Entry Animation for Products
-        gsap.from(".product-card", {
-            duration: 0.8, y: 50, opacity: 0, stagger: 0.1, ease: "power2.out", delay: 0.2
-        });
     </script>
 </body>
 </html>
