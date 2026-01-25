@@ -16,7 +16,7 @@ SERP_API_KEY = "d66eccb121b3453152187f2442537b0fe5b3c82c4b8d4d56b89ed4d52c9f01a6
 # 2. PASTE YOUR NEW SUPABASE LINK HERE 👇
 # Replace [YOUR-PASSWORD] with the actual password you typed!
 # Example: "postgresql://postgres:MyPass123@db.xyz.supabase.co:5432/postgres"
-SUPABASE_DB_URL = "postgresql://postgres.dqndrkyherascrrhejih:Dashpriyansu2006@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres"
+SUPABASE_DB_URL = "postgresql://postgres.dqndrkyherascrrhejih:Dashpriyansu2006s@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
 
 
 # --- DATABASE CONNECTION LOGIC ---
