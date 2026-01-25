@@ -1,112 +1,229 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Results</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-body { background: #020617; color: white; font-family: 'Poppins', sans-serif; margin: 0; min-height: 100vh; }
-header {
-    background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(56, 189, 248, 0.1); padding: 15px 40px;
-    display: flex; justify-content: space-between; align-items: center;
-    position: sticky; top: 0; z-index: 100;
-}
-.header-left h2 { margin: 0; font-size: 1.4rem; background: linear-gradient(to right, #e0f2fe, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.back-btn { color: #94a3b8; text-decoration: none; font-size: 0.85rem; display: block; margin-top: 5px; }
-.back-btn:hover { color: #38bdf8; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Future Shop | Results for {{ product }}</title>
+    
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-.controls { display: flex; gap: 15px; align-items: center; }
-.store-filter { background: rgba(30, 41, 59, 0.6); color: #e0f2fe; border: 1px solid rgba(56, 189, 248, 0.3); padding: 8px 15px; border-radius: 20px; outline: none; }
-.sort-select { background: rgba(30, 41, 59, 0.6); color: #e0f2fe; border: 1px solid rgba(56, 189, 248, 0.3); padding: 8px 15px; border-radius: 20px; cursor: pointer; outline: none; }
-.sort-select option { background: #0f172a; }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-/* USER MENU */
-.nav-bar { position: relative; margin-left: 20px; }
-.user-menu-btn { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
-.dropdown-content { display: none; position: absolute; right: 0; top: 45px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 12px; min-width: 160px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-.dropdown-content a { color: #e2e8f0; padding: 12px 16px; text-decoration: none; display: block; font-size: 0.9rem; }
-.dropdown-content a:hover { background: rgba(56, 189, 248, 0.2); }
-.show { display: block; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; padding: 40px; max-width: 1400px; margin: 0 auto; }
-.card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(56, 189, 248, 0.1); border-radius: 20px; padding: 20px; transition: 0.4s; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-.card:hover { transform: translateY(-10px); background: rgba(30, 41, 59, 0.6); border-color: rgba(56, 189, 248, 0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-.img-container { height: 180px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
-.product-img { max-height: 100%; max-width: 100%; object-fit: contain; }
-.store-info { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 0.85rem; color: #94a3b8; }
-.store-logo { width: 24px; height: 24px; border-radius: 50%; background: white; padding: 2px; }
-h3 { font-size: 1rem; font-weight: 600; margin: 0 0 10px 0; color: #e2e8f0; flex-grow: 1; }
-.price-tag { font-size: 1.8rem; font-weight: 700; color: #38bdf8; margin-bottom: 15px; }
-.btn-offer { display: block; text-align: center; padding: 12px; border-radius: 12px; background: linear-gradient(90deg, #0284c7, #38bdf8); color: white; font-weight: 700; text-decoration: none; transition: 0.3s; }
-.btn-offer:hover { opacity: 1; letter-spacing: 1px; box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
-.hidden { display: none !important; }
-</style>
+        :root {
+            --bg-color: #1f242d;
+            --second-bg: #323946;
+            --main-color: #0ef;
+            --text-color: #fff;
+        }
+
+        body {
+            min-height: 100vh; background: var(--bg-color); color: var(--text-color);
+            position: relative; overflow-x: hidden;
+            padding-bottom: 60px;
+        }
+
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
+        /* --- HEADER AREA --- */
+        .results-header {
+            padding: 30px 50px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(31, 36, 45, 0.8); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 238, 255, 0.2);
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .results-header h1 { font-size: 1.5rem; }
+        .results-header span { color: var(--main-color); }
+
+        .controls form { display: flex; gap: 10px; }
+        
+        .sort-select {
+            padding: 8px 15px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--main-color);
+            color: var(--text-color); border-radius: 5px; cursor: pointer; outline: none;
+        }
+        
+        .btn {
+            padding: 8px 20px; background: var(--main-color); color: var(--bg-color);
+            border: none; border-radius: 5px; font-weight: 600; cursor: pointer; text-decoration: none;
+            display: inline-block; transition: 0.3s;
+        }
+        .btn:hover { box-shadow: 0 0 15px var(--main-color); }
+        .btn-outline { background: transparent; border: 1px solid var(--main-color); color: var(--main-color); }
+        .btn-outline:hover { background: var(--main-color); color: var(--bg-color); }
+
+        /* --- PRODUCT GRID --- */
+        .grid-container {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px; padding: 40px 50px;
+        }
+
+        /* --- PRODUCT CARD --- */
+        .product-card {
+            background: rgba(31, 36, 45, 0.7);
+            border: 1px solid rgba(0, 238, 255, 0.1);
+            border-radius: 15px; padding: 20px;
+            backdrop-filter: blur(5px);
+            transition: 0.3s; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--main-color);
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.2);
+        }
+
+        .img-container {
+            width: 100%; height: 200px; display: flex; justify-content: center; align-items: center;
+            background: #fff; border-radius: 10px; margin-bottom: 15px; padding: 10px;
+        }
+        .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .store-logo {
+            position: absolute; top: 10px; right: 10px;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: white; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .product-title { font-size: 1rem; margin-bottom: 10px; line-height: 1.4; height: 45px; overflow: hidden; }
+        
+        .price-tag { font-size: 1.5rem; color: var(--main-color); font-weight: 700; margin-bottom: 15px; }
+
+        .view-btn {
+            width: 100%; padding: 10px; text-align: center;
+            background: transparent; border: 2px solid var(--main-color);
+            color: var(--text-color); border-radius: 8px; font-weight: 600; text-decoration: none;
+            transition: 0.3s;
+        }
+        .view-btn:hover { background: var(--main-color); color: var(--bg-color); box-shadow: 0 0 10px var(--main-color); }
+
+        /* --- FOOTER --- */
+        .footer-info {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(31, 36, 45, 0.9); padding: 10px;
+            text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6);
+            z-index: 10; border-top: 1px solid rgba(0, 238, 255, 0.1);
+        }
+        .highlight { color: var(--main-color); font-weight: bold; }
+    </style>
 </head>
 <body>
 
-<header>
-    <div class="header-left">
-        <h2>Results for "{{ product }}"</h2>
-        <a href="/" class="back-btn">← Search Again</a>
-    </div>
+    <canvas id="bg-canvas"></canvas>
 
-    <div class="controls">
-        <input type="text" id="storeInput" class="store-filter" placeholder="Filter by Store...">
-        <form action="/search" method="POST" style="margin:0;">
-            <input type="hidden" name="product" value="{{ product }}">
-            <select name="sort" class="sort-select" onchange="this.form.submit()">
-                <option value="low" {% if sort_order == 'low' %}selected{% endif %}>Low → High</option>
-                <option value="high" {% if sort_order == 'high' %}selected{% endif %}>High → Low</option>
-            </select>
-        </form>
-
-        <div class="nav-bar">
-            <div class="user-menu-btn" onclick="toggleMenu()">👤 {{ user.username }} ▼</div>
-            <div class="dropdown-content" id="userDropdown">
-                <a href="/account">⚙️ My Account</a>
-                <a href="/logout" style="color: #ff4d4d;">🚪 Logout</a>
-            </div>
+    <div class="results-header">
+        <h1>Results for: <span>"{{ product }}"</span></h1>
+        
+        <div class="controls">
+            <a href="/" class="btn btn-outline" style="margin-right: 15px;">New Search</a>
+            
+            <form action="/search" method="POST" style="display: inline-flex;">
+                <input type="hidden" name="product" value="{{ product }}">
+                <select name="sort" class="sort-select" onchange="this.form.submit()">
+                    <option value="" disabled selected>Sort Price</option>
+                    <option value="low" {% if sort_order == 'low' %}selected{% endif %}>Low to High</option>
+                    <option value="high" {% if sort_order == 'high' %}selected{% endif %}>High to Low</option>
+                </select>
+            </form>
         </div>
     </div>
-</header>
 
-<div class="grid" id="resultsGrid">
-{% for r in results %}
-  <div class="card" data-store="{{ r.store | lower }}">
-    <div class="img-container">
-        {% if r.thumbnail %} <img src="{{ r.thumbnail }}" class="product-img">
-        {% else %} <div style="font-size: 40px;">🛍️</div> {% endif %}
+    <div class="grid-container">
+        {% if results %}
+            {% for item in results %}
+            <div class="product-card">
+                <img src="{{ url_for('static', filename=item.logo) }}" class="store-logo" alt="{{ item.store }}">
+                
+                <div class="img-container">
+                    <img src="{{ item.thumbnail }}" alt="Product Image">
+                </div>
+                
+                <div>
+                    <h3 class="product-title">{{ item.title }}</h3>
+                    <div class="price-tag">{{ item.price }}</div>
+                </div>
+
+                <a href="{{ item.link }}" target="_blank" class="view-btn">View Deal</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                <h2>No results found.</h2>
+                <p>Try searching for something else!</p>
+            </div>
+        {% endif %}
     </div>
-    <div class="store-info">
-      <img src="{{ url_for('static', filename='logos/' + r.logo) }}" class="store-logo">
-      <span class="store-name">{{ r.store }}</span>
+
+    <div class="footer-info">
+        Made with ❤️ by <strong class="highlight">Priyansu</strong> | 
+        Copyright reserved by <strong class="highlight">Priyansu</strong> | 
+        pupuhari123@gmail.com
     </div>
-    <h3>{{ r.title }}</h3>
-    <div class="price-tag">{{ r.price }}</div>
-    <a href="{{ r.link }}" target="_blank" class="btn-offer">View Offer</a>
-  </div>
-{% endfor %}
-</div>
 
-<script>
-    const storeInput = document.getElementById('storeInput');
-    const cards = document.querySelectorAll('.card');
-    storeInput.addEventListener('input', function(e) {
-        const searchText = e.target.value.toLowerCase();
-        cards.forEach(card => {
-            const storeName = card.getAttribute('data-store');
-            if (storeName.includes(searchText) || searchText === '') card.classList.remove('hidden');
-            else card.classList.add('hidden');
-        });
-    });
+    <script>
+        // Background Animation
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const particleCount = 80;
+        const connectionDistance = 150;
 
-    function toggleMenu() { document.getElementById("userDropdown").classList.toggle("show"); }
-    window.onclick = function(e) {
-        if (!e.target.matches('.user-menu-btn')) {
-            var dd = document.getElementsByClassName("dropdown-content");
-            for(var i=0; i<dd.length; i++) { if (dd[i].classList.contains('show')) dd[i].classList.remove('show'); }
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = (Math.random() - 0.5) * 1;
+                this.size = Math.random() * 2 + 1;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = '#0ef'; ctx.fill();
+            }
         }
-    }
-</script>
+        for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update(); particles[i].draw();
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < connectionDistance) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 238, 255, ${1 - distance / connectionDistance})`;
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Staggered Entry Animation for Products
+        gsap.from(".product-card", {
+            duration: 0.8, y: 50, opacity: 0, stagger: 0.1, ease: "power2.out", delay: 0.2
+        });
+    </script>
 </body>
 </html>
