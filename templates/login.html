@@ -4,316 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Future Access | Login</title>
-    
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
     <style>
-        /* --- CSS STYLES --- */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
-        :root {
-            --bg-color: #1f242d;   /* Portfolio Dark Background */
-            --second-bg: #323946;  
-            --main-color: #0ef;    /* Portfolio Neon Cyan */
-            --text-color: #fff;
-        }
-
-        body {
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; 
-            background: var(--bg-color); 
-            color: var(--text-color);
-            overflow: hidden;
-            position: relative;
-            flex-direction: column; /* Stack Card and Footer */
-        }
-
-        /* --- CANVAS FOR GEOMETRIC LINES --- */
-        #bg-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-        }
-
-        /* --- 3D FLIP CONTAINER --- */
-        .book-container {
-            width: 400px;
-            height: 520px;
-            perspective: 1000px; /* Essential for 3D effect */
-            margin-bottom: 20px;
-        }
-
-        .book-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.8s;
-            transform-style: preserve-3d;
-        }
-
-        /* The class we add via JS to flip the page */
-        .flipped {
-            transform: rotateY(180deg);
-        }
-
-        /* Common styles for Front (Login) and Back (Register) */
-        .face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            background: rgba(31, 36, 45, 0.75);
-            border: 2px solid rgba(0, 238, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 40px;
-        }
-
-        /* Front is default */
-        .front {
-            z-index: 2;
-        }
-
-        /* Back is rotated 180deg initially */
-        .back {
-            transform: rotateY(180deg);
-        }
-
-        h2 { 
-            font-size: 2em; color: var(--text-color); text-align: center; margin-bottom: 20px; 
-            text-shadow: 0 0 10px rgba(0, 238, 255, 0.3);
-        }
-
-        /* Input Styles */
-        .input-box { position: relative; width: 100%; height: 50px; border-bottom: 2px solid var(--text-color); margin: 25px 0; }
-        .input-box label { position: absolute; top: 50%; left: 5px; transform: translateY(-50%); font-size: 1em; color: var(--text-color); pointer-events: none; transition: .5s; }
-        
-        .input-box input:focus ~ label, .input-box input:valid ~ label { 
-            top: -5px; color: var(--main-color); text-shadow: 0 0 5px var(--main-color);
-        }
-        .input-box input:focus ~ .icon, .input-box input:valid ~ .icon {
-            color: var(--main-color);
-        }
-
-        .input-box input { width: 100%; height: 100%; background: transparent; border: none; outline: none; font-size: 1em; color: var(--text-color); padding: 0 35px 0 5px; }
-        .input-box .icon { position: absolute; right: 8px; font-size: 1.2em; color: var(--text-color); line-height: 57px; transition: 0.5s; }
-
-        /* Buttons & Links */
-        button { 
-            width: 100%; height: 45px; background: var(--main-color); border: none; 
-            border-radius: 40px; cursor: pointer; font-size: 1em; color: #1f242d; 
-            font-weight: 600; transition: 0.3s; box-shadow: 0 0 10px var(--main-color);
-        }
-        button:hover { box-shadow: 0 0 20px var(--main-color), 0 0 40px var(--main-color); transform: scale(1.02); }
-        
-        .toggle-link { font-size: .9em; color: var(--text-color); text-align: center; margin: 20px 0 10px; }
-        .toggle-link span { color: var(--text-color); font-weight: 600; cursor: pointer; transition: 0.3s; text-decoration: underline; }
-        .toggle-link span:hover { color: var(--main-color); text-shadow: 0 0 5px var(--main-color); }
-        
-        .remember-forgot { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 15px; }
-        .remember-forgot a { color: var(--text-color); text-decoration: none; transition: 0.3s; }
-        .remember-forgot a:hover { color: var(--main-color); }
-        .remember-forgot label input { accent-color: var(--main-color); margin-right: 3px; }
-
-        /* Flash Messages */
+        :root { --bg-color: #1f242d; --main-color: #0ef; --text-color: #fff; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--bg-color); color: var(--text-color); overflow: hidden; }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .book-container { width: 400px; height: 520px; perspective: 1000px; }
+        .book-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; }
+        .flipped { transform: rotateY(180deg); }
+        .face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: rgba(31, 36, 45, 0.75); border: 2px solid rgba(0, 238, 255, 0.1); border-radius: 20px; backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; justify-content: center; padding: 40px; }
+        .back { transform: rotateY(180deg); }
+        h2 { font-size: 2em; margin-bottom: 20px; text-shadow: 0 0 10px rgba(0, 238, 255, 0.3); }
+        .input-box { position: relative; width: 100%; height: 50px; border-bottom: 2px solid #fff; margin: 25px 0; }
+        .input-box label { position: absolute; top: 50%; left: 5px; transform: translateY(-50%); color: #fff; pointer-events: none; transition: .5s; }
+        .input-box input:focus ~ label, .input-box input:valid ~ label { top: -5px; color: var(--main-color); }
+        .input-box input { width: 100%; height: 100%; background: transparent; border: none; outline: none; font-size: 1em; color: #fff; padding: 0 35px 0 5px; }
+        .input-box .icon { position: absolute; right: 8px; font-size: 1.2em; color: #fff; line-height: 57px; }
+        button { width: 100%; height: 45px; background: var(--main-color); border: none; border-radius: 40px; cursor: pointer; font-size: 1em; color: #1f242d; font-weight: 600; transition: 0.3s; box-shadow: 0 0 10px var(--main-color); }
+        button:hover { box-shadow: 0 0 20px var(--main-color); transform: scale(1.02); }
+        .toggle-link { margin-top: 20px; font-size: 0.9em; }
+        .toggle-link span { color: var(--text-color); font-weight: 600; cursor: pointer; text-decoration: underline; }
+        .toggle-link span:hover { color: var(--main-color); }
+        .footer-info { position: fixed; bottom: 10px; text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); width: 100%; z-index: 10; }
+        .highlight { color: var(--main-color); }
         .flash-container { position: absolute; top: 10px; width: 100%; display: flex; justify-content: center; z-index: 100; }
-        .flash { 
-            padding: 10px 20px; border-radius: 8px; background: rgba(31, 36, 45, 0.9); 
-            color: var(--main-color); margin-bottom: 10px; border: 1px solid var(--main-color); 
-            box-shadow: 0 0 10px rgba(0, 238, 255, 0.2);
-        }
-
-        /* --- FOOTER --- */
-        .footer-info {
-            position: fixed;
-            bottom: 10px;
-            text-align: center;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.6;
-            width: 100%;
-            z-index: 10;
-        }
-        .footer-info span {
-            display: block;
-        }
-        .footer-info .highlight {
-            color: var(--main-color);
-        }
+        .flash { padding: 10px 20px; border-radius: 8px; background: rgba(31, 36, 45, 0.9); color: var(--main-color); border: 1px solid var(--main-color); margin-bottom: 10px; }
     </style>
 </head>
 <body>
-
     <canvas id="bg-canvas"></canvas>
-
     <div class="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    {% if "Please log in to access this page" not in message %}
-                        <div class="flash">{{ message }}</div>
-                    {% endif %}
+                    {% if "Please log in" not in message %}<div class="flash">{{ message }}</div>{% endif %}
                 {% endfor %}
             {% endif %}
         {% endwith %}
     </div>
-
     <div class="book-container">
         <div class="book-inner">
-            
             <div class="face front">
                 <h2>Login</h2>
                 <form action="/login" method="POST">
                     <input type="hidden" name="action" value="login">
-                    
-                    <div class="input-box">
-                        <span class="icon"><ion-icon name="person"></ion-icon></span>
-                        <input type="text" name="username" required autocomplete="off">
-                        <label>Username</label>
-                    </div>
-                    
-                    <div class="input-box">
-                        <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                        <input type="password" name="password" required>
-                        <label>Password</label>
-                    </div>
-                    
-                    <div class="remember-forgot">
-                        <label><input type="checkbox"> Remember me</label>
-                        <a href="/reset_password">Forgot Password?</a>
-                    </div>
-                    
+                    <div class="input-box"><span class="icon"><ion-icon name="person"></ion-icon></span><input type="text" name="username" required autocomplete="off"><label>Username</label></div>
+                    <div class="input-box"><span class="icon"><ion-icon name="lock-closed"></ion-icon></span><input type="password" name="password" required><label>Password</label></div>
+                    <a href="/reset_password" style="color:white; font-size:0.9em; display:block; margin-bottom:15px; text-align:right;">Forgot Password?</a>
                     <button type="submit">Login</button>
-                    
-                    <div class="toggle-link">
-                        <p>Don't have an account? <span id="go-to-register">Register</span></p>
-                    </div>
+                    <div class="toggle-link"><p>Don't have an account? <span id="go-to-register">Register</span></p></div>
                 </form>
             </div>
-
             <div class="face back">
                 <h2>Register</h2>
                 <form action="/login" method="POST">
                     <input type="hidden" name="action" value="register">
-                    
-                    <div class="input-box">
-                        <span class="icon"><ion-icon name="person"></ion-icon></span>
-                        <input type="text" name="username" required autocomplete="off">
-                        <label>Username</label>
-                    </div>
-
-                    <div class="input-box">
-                        <span class="icon"><ion-icon name="mail"></ion-icon></span>
-                        <input type="email" name="email" required autocomplete="off">
-                        <label>Email</label>
-                    </div>
-                    
-                    <div class="input-box">
-                        <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                        <input type="password" name="password" required>
-                        <label>Password</label>
-                    </div>
-                    
+                    <div class="input-box"><span class="icon"><ion-icon name="person"></ion-icon></span><input type="text" name="username" required autocomplete="off"><label>Username</label></div>
+                    <div class="input-box"><span class="icon"><ion-icon name="mail"></ion-icon></span><input type="email" name="email" required autocomplete="off"><label>Email</label></div>
+                    <div class="input-box"><span class="icon"><ion-icon name="lock-closed"></ion-icon></span><input type="password" name="password" required><label>Password</label></div>
                     <button type="submit">Register</button>
-                    
-                    <div class="toggle-link">
-                        <p>Already have an account? <span id="go-to-login">Login</span></p>
-                    </div>
+                    <div class="toggle-link"><p>Already have an account? <span id="go-to-login">Login</span></p></div>
                 </form>
             </div>
-
         </div>
     </div>
-
-    <div class="footer-info">
-        <span>Made with ❤️ by <strong class="highlight">Priyansu</strong></span>
-        <span>Copyright reserved by <strong class="highlight">Priyansu</strong></span>
-        <span>pupuhari123@gmail.com</span>
-    </div>
-
+    <div class="footer-info"><span>Made with ❤️ by <strong class="highlight">Priyansu</strong></span> | <span>pupuhari123@gmail.com</span></div>
     <script>
-        // --- 1. GEOMETRIC LINES ANIMATION ---
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        const particleCount = 100;
-        const connectionDistance = 150;
-
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 1.5;
-                this.vy = (Math.random() - 0.5) * 1.5;
-                this.size = Math.random() * 2 + 1;
-            }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-            }
-            draw() {
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = '#0ef'; ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < particleCount; i++) particles.push(new Particle());
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update(); particles[i].draw();
-                for (let j = i; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < connectionDistance) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(0, 238, 255, ${1 - distance / connectionDistance})`;
-                        ctx.lineWidth = 1;
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-
-        // --- 2. 3D FLIP LOGIC ---
+        const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
+        let particles = []; function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        class Particle { constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 1.5; this.vy = (Math.random() - 0.5) * 1.5; this.size = Math.random() * 2 + 1; } update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = '#0ef'; ctx.fill(); } }
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
+        function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
         document.addEventListener("DOMContentLoaded", () => {
             const bookInner = document.querySelector('.book-inner');
-            const registerBtn = document.getElementById('go-to-register');
-            const loginBtn = document.getElementById('go-to-login');
-
-            // Float In Animation (GSAP)
-            gsap.from(".book-container", { duration: 1.5, y: 100, opacity: 0, ease: "power3.out" });
-            gsap.from(".footer-info", { duration: 1.5, y: 20, opacity: 0, delay: 0.5 });
-
-            // Flip Actions
-            registerBtn.addEventListener('click', () => {
-                bookInner.classList.add('flipped');
-            });
-
-            loginBtn.addEventListener('click', () => {
-                bookInner.classList.remove('flipped');
-            });
+            document.getElementById('go-to-register').addEventListener('click', () => bookInner.classList.add('flipped'));
+            document.getElementById('go-to-login').addEventListener('click', () => bookInner.classList.remove('flipped'));
         });
     </script>
 </body>

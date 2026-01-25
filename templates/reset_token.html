@@ -3,40 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Password - Future Shop</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>New Password</title>
     <style>
-        body {
-            display: flex; justify-content: center; align-items: center; min-height: 100vh;
-            background: linear-gradient(-45deg, #020617, #1e1b4b, #0f172a, #312e81);
-            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
-            font-family: 'Poppins', sans-serif; color: white; margin: 0;
-        }
-        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        
-        .card {
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
-            padding: 40px; width: 90%; max-width: 400px; text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-        h2 { margin-bottom: 20px; font-weight: 700; color: #38bdf8; }
-        input {
-            width: 100%; padding: 15px; margin-bottom: 20px;
-            background: rgba(15, 23, 42, 0.6); border: 2px solid rgba(56, 189, 248, 0.1);
-            border-radius: 12px; color: white; outline: none; box-sizing: border-box;
-        }
-        button {
-            width: 100%; padding: 15px; background: linear-gradient(135deg, #0284c7, #7c3aed);
-            border: none; border-radius: 12px; color: white; font-weight: 600; cursor: pointer;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #1f242d; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: rgba(31, 36, 45, 0.75); border: 2px solid rgba(0, 238, 255, 0.1); border-radius: 20px; padding: 40px; text-align: center; width: 400px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); }
+        h2 { color: #0ef; margin-bottom: 20px; }
+        input { width: 100%; padding: 15px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid #fff; border-radius: 8px; color: #fff; outline: none; }
+        input:focus { border-color: #0ef; }
+        button { width: 100%; padding: 15px; background: #0ef; border: none; border-radius: 8px; font-weight: 600; color: #1f242d; cursor: pointer; }
+        button:hover { box-shadow: 0 0 15px #0ef; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>New Password</h2>
+        <h2>Set New Password</h2>
         <form method="POST">
-            <input type="password" name="password" placeholder="Enter new password" required>
+            <input type="password" name="password" placeholder="New Password" required>
             <button type="submit">Update Password</button>
         </form>
     </div>

@@ -3,245 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Future Shop | Home</title>
-    
+    <title>Future Shop</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
     <style>
-        /* --- CSS STYLES --- */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
-        :root {
-            --bg-color: #1f242d;
-            --second-bg: #323946;
-            --main-color: #0ef;
-            --text-color: #fff;
-        }
-
-        body {
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; 
-            background: var(--bg-color); 
-            color: var(--text-color);
-            overflow: hidden;
-            position: relative;
-            flex-direction: column;
-        }
-
-        /* --- GEOMETRIC BACKGROUND --- */
-        #bg-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-        }
-
-        /* --- NAVBAR (LOGOUT BUTTON) --- */
-        .nav-bar {
-            position: absolute; top: 20px; right: 30px; z-index: 10;
-        }
-        .logout-btn {
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: 600;
-            padding: 10px 20px;
-            border: 2px solid var(--main-color);
-            border-radius: 8px;
-            transition: 0.3s;
-            background: rgba(31, 36, 45, 0.8);
-        }
-        .logout-btn:hover {
-            background: var(--main-color);
-            color: var(--bg-color);
-            box-shadow: 0 0 15px var(--main-color);
-        }
-
-        /* --- GLASS CARD (SEARCH BOX) --- */
-        .wrapper {
-            position: relative; width: 90%; max-width: 500px;
-            background: rgba(31, 36, 45, 0.75);
-            border: 2px solid rgba(0, 238, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            padding: 40px;
-            text-align: center;
-        }
-
-        h2 { 
-            font-size: 2rem; margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(0, 238, 255, 0.3);
-        }
-        p { color: #ccc; margin-bottom: 30px; font-size: 0.9rem; }
-
-        /* SEARCH INPUT */
-        .input-box {
-            position: relative; width: 100%; margin-bottom: 25px;
-        }
-        .input-box input {
-            width: 100%; padding: 15px 20px 15px 50px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: white; font-size: 1rem; outline: none; transition: 0.3s;
-        }
-        .input-box .icon {
-            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
-            font-size: 1.2rem; color: #ccc;
-        }
-        
-        /* Focus Effects */
-        .input-box input:focus {
-            border-color: var(--main-color);
-            box-shadow: 0 0 10px rgba(0, 238, 255, 0.2);
-        }
-        .input-box input:focus ~ .icon { color: var(--main-color); }
-
-        /* ACTION BUTTONS */
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #1f242d; color: #fff; overflow: hidden; flex-direction: column; }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .wrapper { width: 90%; max-width: 500px; background: rgba(31, 36, 45, 0.75); border: 2px solid rgba(0, 238, 255, 0.1); border-radius: 20px; backdrop-filter: blur(10px); padding: 40px; text-align: center; }
+        .input-box { position: relative; width: 100%; margin-bottom: 25px; }
+        .input-box input { width: 100%; padding: 15px 20px 15px 50px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: white; outline: none; transition: 0.3s; }
+        .input-box input:focus { border-color: #0ef; box-shadow: 0 0 10px rgba(0, 238, 255, 0.2); }
+        .input-box .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: #ccc; }
         .btn-group { display: flex; gap: 15px; }
-        
-        button { 
-            padding: 12px; border: none; outline: none;
-            border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s;
-            font-size: 1rem; flex: 1;
-        }
-
-        .search-btn {
-            background: var(--main-color); color: var(--bg-color);
-            box-shadow: 0 0 10px var(--main-color);
-        }
-        .search-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px var(--main-color);
-        }
-
-        .history-btn {
-            background: transparent; color: var(--text-color);
-            border: 2px solid var(--text-color);
-        }
-        .history-btn:hover {
-            border-color: var(--main-color); color: var(--main-color);
-        }
-        
-        /* Wishlist Button Style */
-        .wishlist-btn-link {
-            flex: 0.4; /* Smaller than other buttons */
-        }
-        .wishlist-btn {
-            background: transparent; color: var(--main-color);
-            border: 2px solid var(--main-color); display: flex; justify-content: center; align-items: center;
-        }
-        .wishlist-btn:hover {
-            background: var(--main-color); color: var(--bg-color);
-            box-shadow: 0 0 15px var(--main-color);
-        }
-
-        /* --- FOOTER --- */
-        .footer-info {
-            position: fixed; bottom: 10px; text-align: center;
-            font-size: 0.8rem; color: rgba(255, 255, 255, 0.6);
-            width: 100%; z-index: 10; line-height: 1.6;
-        }
-        .highlight { color: var(--main-color); font-weight: bold; }
+        button { padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; flex: 1; }
+        .search-btn { background: #0ef; color: #1f242d; box-shadow: 0 0 10px #0ef; }
+        .search-btn:hover { transform: scale(1.05); }
+        .history-btn { background: transparent; color: #fff; border: 2px solid #fff; }
+        .history-btn:hover { border-color: #0ef; color: #0ef; }
+        .wishlist-btn { background: transparent; color: #0ef; border: 2px solid #0ef; }
+        .wishlist-btn:hover { background: #0ef; color: #1f242d; }
+        .footer-info { position: fixed; bottom: 10px; text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); width: 100%; }
+        .nav-bar { position: absolute; top: 20px; right: 30px; }
+        .logout-btn { text-decoration: none; color: #fff; font-weight: 600; padding: 10px 20px; border: 2px solid #0ef; border-radius: 8px; }
     </style>
 </head>
 <body>
-
     <canvas id="bg-canvas"></canvas>
-
-    <div class="nav-bar">
-        <a href="/logout" class="logout-btn">Logout</a>
-    </div>
-
+    <div class="nav-bar"><a href="/logout" class="logout-btn">Logout</a></div>
     <div class="wrapper">
         <h2>Hello, {{ user.username }}!</h2>
         <p>What are you looking for today?</p>
-
         <form action="/search" method="POST">
-            <div class="input-box">
-                <span class="icon"><ion-icon name="search"></ion-icon></span>
-                <input type="text" name="product" placeholder="Enter product name..." required autocomplete="off">
-            </div>
-
+            <div class="input-box"><span class="icon"><ion-icon name="search"></ion-icon></span><input type="text" name="product" placeholder="Enter product name..." required autocomplete="off"></div>
             <div class="btn-group">
                 <button type="submit" class="search-btn">Search</button>
-                <a href="/account" style="flex: 1;">
-                    <button type="button" class="history-btn">History</button>
-                </a>
-                <a href="/wishlist" class="wishlist-btn-link">
-                    <button type="button" class="wishlist-btn"><ion-icon name="heart" style="font-size: 1.2rem;"></ion-icon></button>
-                </a>
+                <a href="/account" style="flex: 1;"><button type="button" class="history-btn">History</button></a>
+                <a href="/wishlist" style="flex: 0.4;"><button type="button" class="wishlist-btn"><ion-icon name="heart" style="font-size:1.2rem;"></ion-icon></button></a>
             </div>
         </form>
     </div>
-
-    <div class="footer-info">
-        <span>Made with ❤️ by <strong class="highlight">Priyansu</strong></span>
-        <span>Copyright reserved by <strong class="highlight">Priyansu</strong></span>
-        <span>pupuhari123@gmail.com</span>
-    </div>
-
+    <div class="footer-info">Made with ❤️ by <strong>Priyansu</strong> | pupuhari123@gmail.com</div>
     <script>
-        // --- 1. GEOMETRIC LINES ANIMATION ---
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        const particleCount = 100;
-        const connectionDistance = 150;
-
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.vx = (Math.random() - 0.5) * 1.5;
-                this.vy = (Math.random() - 0.5) * 1.5;
-                this.size = Math.random() * 2 + 1;
-            }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-            }
-            draw() {
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = '#0ef'; ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < particleCount; i++) particles.push(new Particle());
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update(); particles[i].draw();
-                for (let j = i; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < connectionDistance) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(0, 238, 255, ${1 - distance / connectionDistance})`;
-                        ctx.lineWidth = 1;
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        // --- 2. FLOAT IN ANIMATION ---
+        const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
+        let particles = []; function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        class Particle { constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 1.5; this.vy = (Math.random() - 0.5) * 1.5; this.size = Math.random() * 2 + 1; } update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = '#0ef'; ctx.fill(); } }
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
+        function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
         gsap.from(".wrapper", { duration: 1.2, y: 50, opacity: 0, ease: "power3.out" });
-        gsap.from(".nav-bar", { duration: 1, y: -20, opacity: 0, delay: 0.5 });
-        gsap.from(".footer-info", { duration: 1, y: 20, opacity: 0, delay: 0.5 });
     </script>
 </body>
 </html>
