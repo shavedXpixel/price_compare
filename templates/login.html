@@ -4,248 +4,159 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Future Shop</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
-        :root {
-            --bg-dark: #020617;
-            --glass: rgba(15, 23, 42, 0.95);
-            --neon-blue: #38bdf8;
-            --text-white: #e2e8f0;
-        }
+        /* Base Styles */
         body {
-            background: var(--bg-dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+            background: #020617;
+            color: white;
             font-family: 'Poppins', sans-serif;
-            height: 100vh;
             margin: 0;
-            overflow: hidden;
-        }
-        
-        /* FOOTER CREDIT STYLE */
-        .footer-credit {
-            position: fixed;
-            bottom: 20px;
-            width: 100%;
-            text-align: center;
-            color: #94a3b8;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-            z-index: 0; /* Behind the modal if needed, but visible on bg */
-            opacity: 0.8;
-        }
-
-        .container {
-            background: var(--glass);
-            border-radius: 20px;
-            box-shadow: 0 14px 28px rgba(0,0,0,0.25), 
-                        0 10px 10px rgba(0,0,0,0.22),
-                        0 0 20px rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            position: relative;
-            overflow: hidden;
-            width: 850px;
-            max-width: 100%;
-            min-height: 550px;
-            z-index: 10; /* Keeps form above footer */
-        }
-        .form-container {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            transition: all 0.6s ease-in-out;
-            background-color: var(--bg-dark);
-        }
-        
-        /* LOGIN FORM */
-        .sign-in-container { left: 0; width: 50%; z-index: 2; }
-        
-        .container.right-panel-active .sign-in-container {
-            transform: translateX(100%);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* REGISTER FORM */
-        .sign-up-container { left: 0; width: 50%; opacity: 0; z-index: 1; pointer-events: none; }
-        
-        .container.right-panel-active .sign-up-container {
-            transform: translateX(100%);
-            opacity: 1;
-            z-index: 5;
-            pointer-events: all;
-            animation: show 0.6s;
-        }
-
-        @keyframes show {
-            0%, 49.99% { opacity: 0; z-index: 1; }
-            50%, 100% { opacity: 1; z-index: 5; }
-        }
-        form {
-            background: var(--bg-dark);
+            padding: 0;
             display: flex;
-            align-items: center;
             justify-content: center;
-            flex-direction: column;
-            padding: 0 40px;
-            height: 100%;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* The Card Container */
+        .card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(2, 132, 199, 0.1);
+            
+            /* 2. RESPONSIVE SIZING */
+            width: 90%;          /* Take up 90% of small screens */
+            max-width: 400px;    /* But never get wider than 400px on big screens */
             text-align: center;
-            color: var(--text-white);
         }
-        h1 {
-            font-weight: 800;
-            margin: 0 0 20px 0;
-            background: linear-gradient(to right, #e0f2fe, #38bdf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+        h2 {
+            color: #38bdf8;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
         }
-        span { font-size: 12px; color: #94a3b8; margin-bottom: 20px; display: block; }
+
         input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            padding: 12px 15px;
-            margin: 8px 0;
             width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid #334155;
             border-radius: 8px;
             color: white;
+            box-sizing: border-box; /* Keeps padding inside the width */
+            font-size: 1rem; /* Readable on mobile */
+        }
+
+        input:focus {
             outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
             transition: 0.3s;
         }
-        input:focus { border-color: var(--neon-blue); background: rgba(255, 255, 255, 0.1); }
-        button {
-            border-radius: 20px;
-            border: 1px solid var(--neon-blue);
-            background: linear-gradient(135deg, #0284c7, #38bdf8);
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            padding: 12px 45px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-top: 25px;
-            cursor: pointer;
-            transition: transform 80ms ease-in;
-        }
-        button:active { transform: scale(0.95); }
-        button.ghost { background: transparent; border-color: white; }
-        
-        .toggle-link { margin-top: 20px; font-size: 0.85rem; color: #94a3b8; cursor: pointer; }
-        .toggle-link span { color: var(--neon-blue); font-weight: 600; }
 
-        .overlay-container {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 50%;
-            height: 100%;
-            overflow: hidden;
-            transition: transform 0.6s ease-in-out;
-            z-index: 100;
+        button:hover {
+            transform: scale(1.02);
         }
-        .container.right-panel-active .overlay-container { transform: translateX(-100%); }
-        .overlay {
-            background: linear-gradient(135deg, #0f172a 0%, #0ea5e9 100%);
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-position: 0 0;
-            color: white;
-            position: relative;
-            left: -100%;
-            height: 100%;
-            width: 200%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
+
+        /* Toggle Links (Login vs Register) */
+        .toggle-link {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #94a3b8;
         }
-        .container.right-panel-active .overlay { transform: translateX(50%); }
-        .overlay-panel {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 0 40px;
-            text-align: center;
-            top: 0;
-            height: 100%;
-            width: 50%;
-            transform: translateX(0);
-            transition: transform 0.6s ease-in-out;
+        .toggle-link span {
+            color: #38bdf8;
+            cursor: pointer;
+            text-decoration: underline;
         }
-        .overlay-left { transform: translateX(-20%); }
-        .container.right-panel-active .overlay-left { transform: translateX(0); }
-        .overlay-right { right: 0; transform: translateX(0); }
-        .container.right-panel-active .overlay-right { transform: translateX(20%); }
-        p { margin: 20px 0 30px; font-weight: 300; line-height: 24px; }
+
+        /* Flash Messages */
+        .flash {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        .flash.success { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .flash.error { background: rgba(248, 113, 113, 0.2); color: #f87171; }
+
+        /* Hide sections by default */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="container" id="container">
-    <div class="form-container sign-up-container">
-        <form action="/login" method="POST">
-            <h1>Create Account</h1>
-            <span>use your email for registration</span>
-            <input type="hidden" name="action" value="register">
-            <input type="text" name="username" placeholder="Name" required autocomplete="off" />
-            <input type="email" name="email" placeholder="Email" required autocomplete="off" />
-            <input type="password" name="password" placeholder="Password" required />
-            <button>Sign Up</button>
-            <a class="toggle-link" id="linkLogin">Already have an account? <span>Sign In</span></a>
-        </form>
-    </div>
+<div class="card">
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-    <div class="form-container sign-in-container">
+    <div id="login-section">
+        <h2>Welcome Back</h2>
         <form action="/login" method="POST">
-            <h1>Sign in</h1>
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <div style="color: #ff4d4d; font-size: 0.85rem; margin-bottom: 10px;">{{ messages[0] }}</div>
-                {% endif %}
-            {% endwith %}
-            <span>or use your account</span>
             <input type="hidden" name="action" value="login">
-            <input type="text" name="username" placeholder="Username" required autocomplete="off" />
-            <input type="password" name="password" placeholder="Password" required />
-            <button>Sign In</button>
-            <a class="toggle-link" id="linkRegister">Don't have an account? <span>Sign Up</span></a>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Log In</button>
         </form>
-    </div>
-
-    <div class="overlay-container">
-        <div class="overlay">
-            <div class="overlay-panel overlay-left">
-                <h1>Welcome Back!</h1>
-                <p>To keep comparing prices with us please login with your personal info</p>
-                <button class="ghost" id="signIn">Sign In</button>
-            </div>
-            <div class="overlay-panel overlay-right">
-                <h1>Hello, Friend!</h1>
-                <p>Enter your personal details and start your journey with Future Shop</p>
-                <button class="ghost" id="signUp">Sign Up</button>
-            </div>
+        <div class="toggle-link">
+            New here? <span onclick="toggleForms()">Create an Account</span>
         </div>
     </div>
+
+    <div id="register-section" class="hidden">
+        <h2>Create Account</h2>
+        <form action="/login" method="POST">
+            <input type="hidden" name="action" value="register">
+            <input type="text" name="username" placeholder="Choose a Username" required>
+            <input type="email" name="email" placeholder="Email Address" required>
+            <input type="password" name="password" placeholder="Choose a Password" required>
+            <button type="submit">Sign Up</button>
+        </form>
+        <div class="toggle-link">
+            Already have an account? <span onclick="toggleForms()">Log In</span>
+        </div>
+    </div>
+
 </div>
 
-<div class="footer-credit">Made with ❤️ by Priyansu</div>
-
 <script>
-    const container = document.getElementById('container');
-    const signUpBtn = document.getElementById('signUp');
-    const signInBtn = document.getElementById('signIn');
-    const linkRegister = document.getElementById('linkRegister');
-    const linkLogin = document.getElementById('linkLogin');
+    function toggleForms() {
+        var login = document.getElementById("login-section");
+        var register = document.getElementById("register-section");
 
-    function activateRightPanel() { container.classList.add("right-panel-active"); }
-    function activateLeftPanel() { container.classList.remove("right-panel-active"); }
-
-    signUpBtn.addEventListener('click', activateRightPanel);
-    linkRegister.addEventListener('click', activateRightPanel);
-    signInBtn.addEventListener('click', activateLeftPanel);
-    linkLogin.addEventListener('click', activateLeftPanel);
+        if (login.classList.contains("hidden")) {
+            login.classList.remove("hidden");
+            register.classList.add("hidden");
+        } else {
+            login.classList.add("hidden");
+            register.classList.remove("hidden");
+        }
+    }
 </script>
+
 </body>
 </html>
