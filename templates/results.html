@@ -32,7 +32,7 @@
         /* --- 3D CARD FLIP CONTAINER --- */
         .card-perspective {
             perspective: 1000px;
-            height: 420px; /* Fixed height to ensure flip works cleanly */
+            height: 480px; /* Increased height to fit AI Score */
         }
         
         .card-inner {
@@ -62,30 +62,21 @@
         /* CONTENT STYLES */
         .store-badge { position: absolute; top: 10px; right: 10px; background: #0ef; color: #1f242d; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 20px; z-index: 5; }
         
-        .img-container { width: 100%; height: 180px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 10px; margin-bottom: 10px; padding: 10px; }
+        .img-container { width: 100%; height: 160px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 10px; margin-bottom: 10px; padding: 10px; }
         .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
         .product-title { font-size: 0.95rem; margin-bottom: 5px; height: 42px; overflow: hidden; line-height: 1.4; }
-        .price-tag { font-size: 1.4rem; color: #0ef; font-weight: 700; margin-bottom: 10px; }
+        .price-tag { font-size: 1.4rem; color: #0ef; font-weight: 700; margin-bottom: 5px; }
 
         /* BUTTONS */
         .action-row { display: flex; gap: 8px; align-items: center; }
-        
         .btn { flex: 1; padding: 10px; text-align: center; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.3s; font-size: 0.9rem; cursor: pointer; border: 2px solid #0ef; display: flex; justify-content: center; align-items: center; }
-        
-        /* View Button */
         .view-btn { background: transparent; color: #fff; }
         .view-btn:hover { background: #0ef; color: #1f242d; }
-        
-        /* Graph Button */
         .graph-btn { background: rgba(0, 238, 255, 0.1); color: #0ef; }
         .graph-btn:hover { background: #0ef; color: #1f242d; }
-
-        /* Wishlist Button */
         .wishlist-btn { width: 42px; padding: 0; background: transparent; color: #0ef; }
         .wishlist-btn:hover { background: #0ef; color: #1f242d; }
-
-        /* Back Button (On Chart Side) */
         .back-btn { width: 100%; background: #0ef; color: #1f242d; border: none; margin-top: 10px; }
 
         /* FOOTER & FLASH */
@@ -134,6 +125,22 @@
                         <div>
                             <h3 class="product-title">{{ item.title }}</h3>
                             <div class="price-tag">{{ item.price }}</div>
+                            
+                            <div style="margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #ccc; margin-bottom: 3px;">
+                                    <span>AI Trust Score</span>
+                                    <span style="color: {% if item.trust_score > 80 %}#0f0{% elif item.trust_score > 50 %}#ffaa00{% else %}#ff3333{% endif %}; font-weight: bold;">
+                                        {{ item.trust_score }}%
+                                    </span>
+                                </div>
+                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                    <div style="width: {{ item.trust_score }}%; height: 100%; 
+                                                background: {% if item.trust_score > 80 %}linear-gradient(90deg, #0f0, #00ffaa){% elif item.trust_score > 50 %}linear-gradient(90deg, #ffaa00, #ffcc00){% else %}linear-gradient(90deg, #ff3333, #ff0000){% endif %}; 
+                                                border-radius: 3px; box-shadow: 0 0 10px rgba(0,255,0,0.3);">
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="action-row">
                             <a href="{{ item.link }}" target="_blank" class="btn view-btn">Buy</a>
@@ -184,30 +191,23 @@
 
         // --- 2. CARD FLIP & CHART LOGIC ---
         
-        // Track created charts to avoid duplicates
         let chartInstances = {};
 
         function showGraph(index, currentPrice) {
-            // 1. Flip the Card
             document.getElementById(`card-${index}`).classList.add('flipped');
-
-            // 2. If chart already exists, don't redraw
             if (chartInstances[index]) return;
 
-            // 3. Generate Fake History Data
             const basePrice = parseFloat(currentPrice);
-            if (!basePrice) return; // Handle cases with no price
+            if (!basePrice) return;
             
             let dataPoints = [];
             let labels = [];
             for (let i = 6; i >= 0; i--) {
                 labels.push(i === 0 ? "Today" : `${i}d ago`);
-                // Randomize price between -10% and +10%
                 let variation = basePrice + (Math.random() * basePrice * 0.2 - basePrice * 0.1);
                 dataPoints.push(variation);
             }
 
-            // 4. Render Chart.js
             const ctx = document.getElementById(`chart-${index}`).getContext('2d');
             chartInstances[index] = new Chart(ctx, {
                 type: 'line',
