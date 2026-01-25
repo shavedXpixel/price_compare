@@ -3,265 +3,371 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Future Shop</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>Future Shop | Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
     <style>
-        /* --- 1. ANIMATED BACKGROUND --- */
-        body {
+        /* --- 1. CORE RESET & VARIABLES --- */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary: #a855f7;  /* Purple */
+            --secondary: #3b82f6; /* Blue */
+            --accent: #ec4899;    /* Pink */
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-dim: #94a3b8;
+        }
+
+        /* --- 2. ANIMATED BACKGROUND --- */
+        body {
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            font-family: 'Poppins', sans-serif;
+            background: #0f172a;
             overflow: hidden;
-            background: linear-gradient(-45deg, #020617, #1e1b4b, #0f172a, #312e81);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: white;
+            position: relative;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* Moving Gradient Blobs */
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            z-index: 0;
+            opacity: 0.6;
+            animation: move 20s infinite alternate;
+        }
+        .blob-1 { top: 10%; left: 20%; width: 300px; height: 300px; background: var(--primary); animation-duration: 25s; }
+        .blob-2 { bottom: 10%; right: 20%; width: 350px; height: 350px; background: var(--secondary); animation-duration: 30s; }
+        .blob-3 { top: 40%; left: 50%; width: 250px; height: 250px; background: var(--accent); animation-duration: 22s; }
+
+        @keyframes move {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(20px, -20px) scale(1.1); }
         }
 
-        /* --- 2. GLASSMORPHISM CARD --- */
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 50px 40px;
+        /* --- 3. GLASSMORPHISM CARD --- */
+        .container {
+            position: relative;
+            z-index: 10;
             width: 100%;
-            max-width: 380px;
-            text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            animation: float 6s ease-in-out infinite;
+            max-width: 420px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            overflow: hidden;
         }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+        /* --- 4. FORM ELEMENTS --- */
+        .form-container {
+            position: relative;
+            transition: all 0.5s ease;
         }
 
         h2 {
-            margin-bottom: 30px;
-            font-weight: 700;
+            color: var(--text);
             font-size: 2rem;
-            background: linear-gradient(to right, #38bdf8, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-align: center;
+            letter-spacing: -0.5px;
         }
 
-        /* --- 3. MODERN INPUT FIELDS --- */
+        p.subtitle {
+            color: var(--text-dim);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        /* Floating Input Labels */
         .input-group {
             position: relative;
-            margin-bottom: 25px;
-            text-align: left;
+            margin-bottom: 20px;
         }
 
         .input-group input {
             width: 100%;
-            padding: 15px 15px 15px 45px; /* Space for icon */
-            background: rgba(15, 23, 42, 0.6);
-            border: 2px solid rgba(56, 189, 248, 0.1);
+            padding: 15px 15px 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
             border-radius: 12px;
             color: white;
             font-size: 1rem;
             outline: none;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .input-group input:focus {
-            border-color: #38bdf8;
-            background: rgba(15, 23, 42, 0.9);
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
-        }
-
-        /* Icons inside inputs */
-        .input-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 1.2rem;
             transition: 0.3s;
         }
 
-        .input-group input:focus + .input-icon {
-            color: #38bdf8;
+        .input-group label {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            pointer-events: none;
+            transition: 0.3s ease;
+            font-size: 1rem;
+            background: transparent;
+            padding: 0 5px;
         }
 
-        /* --- 4. GLOWING BUTTON --- */
-        button {
+        /* Input Focus State */
+        .input-group input:focus,
+        .input-group input:not(:placeholder-shown) {
+            border-color: var(--primary);
+            background: rgba(168, 85, 247, 0.05);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+        }
+
+        .input-group input:focus + label,
+        .input-group input:not(:placeholder-shown) + label {
+            top: 0;
+            font-size: 0.75rem;
+            color: var(--primary);
+            background: #0f172a; /* Hides the line behind label */
+        }
+
+        /* Gradient Button */
+        button.btn-primary {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #0284c7, #7c3aed);
+            padding: 16px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
             border: none;
             border-radius: 12px;
             color: white;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.4s ease;
-            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
             margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+            box-shadow: 0 10px 20px -10px rgba(168, 85, 247, 0.5);
         }
 
-        button:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
+        button.btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -10px rgba(168, 85, 247, 0.7);
         }
 
-        /* Toggle Text & Forgot Password */
-        .toggle-link {
-            margin-top: 25px;
+        /* Button Ripple Effect */
+        button.btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        button.btn-primary:active::after {
+            width: 300px; height: 300px;
+        }
+
+        /* --- 5. UTILITIES --- */
+        .toggle-text {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-dim);
             font-size: 0.9rem;
-            color: #cbd5e1;
         }
-        
-        .toggle-link span {
-            color: #38bdf8;
+
+        .toggle-text span {
+            color: var(--secondary);
             cursor: pointer;
             font-weight: 600;
-            transition: 0.2s;
-            text-decoration: none;
-        }
-        
-        .toggle-link span:hover {
-            color: #a855f7;
-            text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+            margin-left: 5px;
+            transition: 0.3s;
         }
 
-        .forgot-link {
+        .toggle-text span:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .forgot-pass {
             display: block;
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: #94a3b8;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        .forgot-link:hover {
-            color: #38bdf8;
-        }
-
-        /* Helpers */
-        .hidden { display: none; }
-        
-        .flash {
-            padding: 12px;
-            border-radius: 10px;
+            text-align: right;
+            margin-top: -10px;
             margin-bottom: 20px;
             font-size: 0.85rem;
-            animation: fadeIn 0.5s ease;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: 0.3s;
         }
-        .flash.success { background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #86efac; }
-        .flash.error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .forgot-pass:hover {
+            color: var(--text);
         }
+
+        /* Flash Messages */
+        .flash {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        .flash.success { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+        .flash.error { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        /* Hide forms initially for JS toggle */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
 
-    <div id="login-section">
-        <h2>Welcome Back</h2>
-        <form action="/login" method="POST">
-            <input type="hidden" name="action" value="login">
+    <div class="container" id="glass-card">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div id="login-form" class="form-container">
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Enter your credentials to access your account</p>
             
-            <div class="input-group">
-                <input type="text" name="username" placeholder="Username" required autocomplete="off">
-                <span class="input-icon">👤</span>
-            </div>
+            <form action="/login" method="POST">
+                <input type="hidden" name="action" value="login">
+                
+                <div class="input-group">
+                    <input type="text" name="username" placeholder=" " required autocomplete="off">
+                    <label>Username</label>
+                </div>
 
-            <div class="input-group">
-                <input type="password" name="password" placeholder="Password" required>
-                <span class="input-icon">🔒</span>
-            </div>
+                <div class="input-group">
+                    <input type="password" name="password" placeholder=" " required>
+                    <label>Password</label>
+                </div>
 
-            <button type="submit">Unlock Access</button>
-        </form>
-        
-        <a href="/reset_password" class="forgot-link">Forgot Password?</a>
-        
-        <div class="toggle-link">
-            First time here? <span onclick="toggleForms()">Initialize Account</span>
+                <a href="/reset_password" class="forgot-pass">Forgot Password?</a>
+
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
+
+            <div class="toggle-text">
+                Don't have an account? <span onclick="switchMode('signup')">Sign Up</span>
+            </div>
         </div>
+
+        <div id="signup-form" class="form-container hidden">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join us and start your journey today</p>
+            
+            <form action="/login" method="POST">
+                <input type="hidden" name="action" value="register">
+                
+                <div class="input-group">
+                    <input type="text" name="username" placeholder=" " required autocomplete="off">
+                    <label>Username</label>
+                </div>
+
+                <div class="input-group">
+                    <input type="email" name="email" placeholder=" " required autocomplete="off">
+                    <label>Email Address</label>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" name="password" placeholder=" " required>
+                    <label>Create Password</label>
+                </div>
+
+                <button type="submit" class="btn-primary">Sign Up</button>
+            </form>
+
+            <div class="toggle-text">
+                Already have an account? <span onclick="switchMode('login')">Sign In</span>
+            </div>
+        </div>
+
     </div>
 
-    <div id="register-section" class="hidden">
-        <h2>New Pilot</h2>
-        <form action="/login" method="POST">
-            <input type="hidden" name="action" value="register">
-            
-            <div class="input-group">
-                <input type="text" name="username" placeholder="Choose Callsign" required autocomplete="off">
-                <span class="input-icon">🆔</span>
-            </div>
+    <script>
+        // 1. Initial Page Load Animation
+        document.addEventListener("DOMContentLoaded", () => {
+            // Animate Card Entry
+            gsap.from("#glass-card", {
+                duration: 1.2,
+                y: 50,
+                opacity: 0,
+                ease: "power3.out"
+            });
 
-            <div class="input-group">
-                <input type="email" name="email" placeholder="Comms Email" required autocomplete="off">
-                <span class="input-icon">📧</span>
-            </div>
+            // Animate Form Elements Staggered
+            gsap.from(".input-group, button, .toggle-text, h2, .subtitle", {
+                duration: 0.8,
+                y: 20,
+                opacity: 0,
+                stagger: 0.1,
+                delay: 0.3,
+                ease: "power2.out"
+            });
+        });
 
-            <div class="input-group">
-                <input type="password" name="password" placeholder="Set Passcode" required>
-                <span class="input-icon">🔑</span>
-            </div>
+        // 2. Switch Mode Animation (Login <-> Signup)
+        function switchMode(mode) {
+            const loginForm = document.getElementById("login-form");
+            const signupForm = document.getElementById("signup-form");
+            const container = document.querySelector(".container");
 
-            <button type="submit">Launch Profile</button>
-        </form>
-        
-        <div class="toggle-link">
-            Already registered? <span onclick="toggleForms()">Return to Login</span>
-        </div>
-    </div>
-
-</div>
-
-<script>
-    function toggleForms() {
-        const login = document.getElementById("login-section");
-        const register = document.getElementById("register-section");
-        const title = document.querySelector('h2');
-
-        // Simple fade transition effect
-        login.style.opacity = '0';
-        register.style.opacity = '0';
-
-        setTimeout(() => {
-            if (login.classList.contains("hidden")) {
-                login.classList.remove("hidden");
-                register.classList.add("hidden");
-                setTimeout(() => login.style.opacity = '1', 50);
+            if (mode === 'signup') {
+                // Fade out Login
+                gsap.to(loginForm, {
+                    duration: 0.3,
+                    opacity: 0,
+                    x: -20,
+                    onComplete: () => {
+                        loginForm.classList.add("hidden");
+                        signupForm.classList.remove("hidden");
+                        
+                        // Fade in Signup
+                        gsap.fromTo(signupForm, 
+                            { opacity: 0, x: 20 }, 
+                            { duration: 0.4, opacity: 1, x: 0, ease: "power2.out" }
+                        );
+                    }
+                });
             } else {
-                login.classList.add("hidden");
-                register.classList.remove("hidden");
-                setTimeout(() => register.style.opacity = '1', 50);
+                // Fade out Signup
+                gsap.to(signupForm, {
+                    duration: 0.3,
+                    opacity: 0,
+                    x: 20,
+                    onComplete: () => {
+                        signupForm.classList.add("hidden");
+                        loginForm.classList.remove("hidden");
+                        
+                        // Fade in Login
+                        gsap.fromTo(loginForm, 
+                            { opacity: 0, x: -20 }, 
+                            { duration: 0.4, opacity: 1, x: 0, ease: "power2.out" }
+                        );
+                    }
+                });
             }
-        }, 200);
-    }
-</script>
+        }
+    </script>
 
 </body>
 </html>
