@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Future Shop | My Wishlist</title>
+    
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        /* Reuse exact same CSS from other pages */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        :root { --bg-color: #1f242d; --second-bg: #323946; --main-color: #0ef; --text-color: #fff; }
+        body { min-height: 100vh; background: var(--bg-color); color: var(--text-color); overflow-x: hidden; padding-bottom: 60px; }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
+        /* Header */
+        .header { padding: 30px 50px; display: flex; justify-content: space-between; align-items: center; background: rgba(31, 36, 45, 0.9); border-bottom: 1px solid var(--main-color); position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 1.5rem; }
+        .nav-link { color: var(--text-color); text-decoration: none; font-weight: 600; border: 2px solid var(--main-color); padding: 8px 20px; border-radius: 8px; transition: 0.3s; }
+        .nav-link:hover { background: var(--main-color); color: var(--bg-color); }
+
+        /* Grid */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; padding: 40px 50px; }
+        
+        /* Card */
+        .product-card { background: var(--second-bg); border: 2px solid rgba(0, 238, 255, 0.1); border-radius: 15px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 0 15px rgba(0,0,0,0.3); }
+        .product-card:hover { transform: translateY(-10px); border-color: var(--main-color); box-shadow: 0 0 20px rgba(0, 238, 255, 0.4); }
+
+        .img-container { width: 100%; height: 200px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 10px; margin-bottom: 15px; padding: 10px; }
+        .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .product-title { font-size: 1rem; margin-bottom: 10px; height: 45px; overflow: hidden; color: #fff; }
+        .price-tag { font-size: 1.5rem; color: var(--main-color); font-weight: 700; margin-bottom: 15px; }
+
+        .btn-group { display: flex; gap: 10px; }
+        .view-btn, .remove-btn { flex: 1; padding: 10px; text-align: center; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.3s; cursor: pointer; border: none;}
+        
+        .view-btn { border: 2px solid var(--main-color); color: var(--text-color); background: transparent; }
+        .view-btn:hover { background: var(--main-color); color: var(--bg-color); }
+        
+        .remove-btn { background: rgba(255, 0, 0, 0.2); border: 1px solid red; color: #ff9999; }
+        .remove-btn:hover { background: red; color: white; }
+
+        /* Footer */
+        .footer-info { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(31, 36, 45, 0.95); padding: 10px; text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); z-index: 10; border-top: 1px solid var(--main-color); }
+        .flash { padding: 15px; margin: 20px 50px 0 50px; background: rgba(0,255,0,0.1); border: 1px solid #0f0; color: #0f0; border-radius: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="header">
+        <h1>My <span>Wishlist</span></h1>
+        <a href="/" class="nav-link">Back to Home</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="grid-container">
+        {% if wishlist %}
+            {% for item in wishlist %}
+            <div class="product-card">
+                <div class="img-container">
+                    <img src="{{ item.image }}" alt="Product Image" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">
+                </div>
+                <div>
+                    <h3 class="product-title">{{ item.title }}</h3>
+                    <div class="price-tag">{{ item.price }}</div>
+                </div>
+                <div class="btn-group">
+                    <a href="{{ item.link }}" target="_blank" class="view-btn">Buy</a>
+                    <a href="/remove_wishlist/{{ item.id }}" class="remove-btn">Remove</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                <h2 style="color: #888;">Your wishlist is empty.</h2>
+                <p style="color: #666;">Go search for some products and save them here!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="footer-info">
+        Made with ❤️ by <strong>Priyansu</strong> | pupuhari123@gmail.com
+    </div>
+
+    <script>
+        // Copy the particle animation script from index.html here for the background
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const particleCount = 80;
+        const connectionDistance = 150;
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+        class Particle {
+            constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 1; this.vy = (Math.random() - 0.5) * 1; this.size = Math.random() * 2 + 1; }
+            update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; }
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = '#0ef'; ctx.fill(); }
+        }
+        for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update(); particles[i].draw();
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y; const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < connectionDistance) { ctx.beginPath(); ctx.strokeStyle = `rgba(0, 238, 255, ${1 - distance / connectionDistance})`; ctx.lineWidth = 1; ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>

@@ -66,13 +66,12 @@
 
         /* --- PRODUCT CARD --- */
         .product-card {
-            background: var(--second-bg); /* Solid color to ensure visibility */
+            background: var(--second-bg);
             border: 2px solid rgba(0, 238, 255, 0.1);
             border-radius: 15px; padding: 20px;
             transition: 0.3s; position: relative; overflow: hidden;
             display: flex; flex-direction: column; justify-content: space-between;
             box-shadow: 0 0 15px rgba(0,0,0,0.3);
-            /* Removed opacity: 0 to fix visibility issues */
         }
 
         .product-card:hover {
@@ -81,7 +80,6 @@
             box-shadow: 0 0 20px rgba(0, 238, 255, 0.4);
         }
 
-        /* IMAGE CONTAINER */
         .img-container {
             width: 100%; height: 200px; display: flex; justify-content: center; align-items: center;
             background: #fff; border-radius: 10px; margin-bottom: 15px; padding: 10px;
@@ -89,7 +87,6 @@
         }
         .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        /* STORE BADGE (Replaces Broken Logo) */
         .store-badge {
             position: absolute; top: 10px; right: 10px;
             background: var(--main-color); color: var(--bg-color);
@@ -108,13 +105,25 @@
             text-shadow: 0 0 5px rgba(0, 238, 255, 0.3);
         }
 
+        .action-row {
+            display: flex; gap: 10px; align-items: center;
+        }
+
         .view-btn {
-            width: 100%; padding: 12px; text-align: center;
+            flex: 1; padding: 12px; text-align: center;
             background: transparent; border: 2px solid var(--main-color);
             color: var(--text-color); border-radius: 8px; font-weight: 600; text-decoration: none;
             transition: 0.3s;
         }
         .view-btn:hover { background: var(--main-color); color: var(--bg-color); box-shadow: 0 0 10px var(--main-color); }
+
+        .wishlist-btn {
+            background: transparent; border: 2px solid var(--main-color);
+            border-radius: 8px; width: 48px; height: 48px; cursor: pointer;
+            color: var(--main-color); display: flex; justify-content: center; align-items: center;
+            transition: 0.3s;
+        }
+        .wishlist-btn:hover { background: var(--main-color); color: var(--bg-color); box-shadow: 0 0 10px var(--main-color); }
 
         /* --- FOOTER --- */
         .footer-info {
@@ -124,11 +133,26 @@
             z-index: 10; border-top: 1px solid var(--main-color);
         }
         .highlight { color: var(--main-color); font-weight: bold; }
+
+        /* Flash Message */
+        .flash {
+            position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8); color: #0f0; border: 1px solid #0f0;
+            padding: 10px 20px; border-radius: 5px; z-index: 200;
+        }
     </style>
 </head>
 <body>
 
     <canvas id="bg-canvas"></canvas>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
     <div class="results-header">
         <h1>Results for: <span>"{{ product }}"</span></h1>
@@ -162,7 +186,20 @@
                     <div class="price-tag">{{ item.price }}</div>
                 </div>
 
-                <a href="{{ item.link }}" target="_blank" class="view-btn">View Deal</a>
+                <div class="action-row">
+                    <a href="{{ item.link }}" target="_blank" class="view-btn">View Deal</a>
+                    
+                    <form action="/add_to_wishlist" method="POST" style="margin: 0;">
+                        <input type="hidden" name="title" value="{{ item.title }}">
+                        <input type="hidden" name="price" value="{{ item.price }}">
+                        <input type="hidden" name="link" value="{{ item.link }}">
+                        <input type="hidden" name="image" value="{{ item.thumbnail }}">
+                        <input type="hidden" name="store" value="{{ item.store }}">
+                        <button type="submit" class="wishlist-btn">
+                            <ion-icon name="heart" style="font-size: 1.5rem;"></ion-icon>
+                        </button>
+                    </form>
+                </div>
             </div>
             {% endfor %}
         {% else %}
