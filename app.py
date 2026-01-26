@@ -17,7 +17,7 @@ app = Flask(__name__)
 # --- 1. CONFIGURATION ---
 SERP_API_KEY = "d66eccb121b3453152187f2442537b0fe5b3c82c4b8d4d56b89ed4d52c9f01a6"
 
-# Database Config
+# Database Config (Neon + Local Fallback)
 NEON_DB_URL = "postgresql://neondb_owner:npg_d3OshXYJxvl6@ep-misty-hat-a1bla5w6.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
 
 database_url = os.environ.get('DATABASE_URL')
@@ -40,46 +40,22 @@ login_manager.login_message = None
 # --- 2. MULTI-LANGUAGE DICTIONARY ---
 TRANSLATIONS = {
     'en': {
-        'hello': "Hello",
-        'looking_for': "What are you looking for today?",
-        'placeholder': "Enter product name...",
-        'search_btn': "Search",
-        'history_btn': "History",
-        'admin_btn': "Admin Panel",
-        'logout_btn': "Logout",
-        'rec_title': "Recommended based on",
-        'voice_listen': "Listening...",
-        'ai_assistant': "AI Assistant",
-        'ask_me': 'Ask me to "Search for phones" or "Go to wishlist".',
-        'footer': "Made with ❤️ by Priyansu"
+        'hello': "Hello", 'looking_for': "What are you looking for today?", 'placeholder': "Enter product name...",
+        'search_btn': "Search", 'history_btn': "History", 'admin_btn': "Admin Panel", 'logout_btn': "Logout",
+        'rec_title': "Recommended based on", 'voice_listen': "Listening...", 'ai_assistant': "AI Assistant",
+        'ask_me': 'Ask me to "Search for phones" or "Go to wishlist".', 'footer': "Made with ❤️ by Priyansu"
     },
     'hi': {
-        'hello': "नमस्ते",
-        'looking_for': "आज आप क्या खोज रहे हैं?",
-        'placeholder': "उत्पाद का नाम दर्ज करें...",
-        'search_btn': "खोजें",
-        'history_btn': "इतिहास",
-        'admin_btn': "एडमिन पैनल",
-        'logout_btn': "लॉग आउट",
-        'rec_title': "इसके आधार पर अनुशंसित",
-        'voice_listen': "सुन रहा हूँ...",
-        'ai_assistant': "एआई सहायक",
-        'ask_me': 'मुझसे "फोन खोजें" या "विशलिस्ट पर जाएं" के लिए कहें।',
-        'footer': "प्रियंशु द्वारा ❤️ के साथ बनाया गया"
+        'hello': "नमस्ते", 'looking_for': "आज आप क्या खोज रहे हैं?", 'placeholder': "उत्पाद का नाम दर्ज करें...",
+        'search_btn': "खोजें", 'history_btn': "इतिहास", 'admin_btn': "एडमिन पैनल", 'logout_btn': "लॉग आउट",
+        'rec_title': "इसके आधार पर अनुशंसित", 'voice_listen': "सुन रहा हूँ...", 'ai_assistant': "एआई सहायक",
+        'ask_me': 'मुझसे "फोन खोजें" या "विशलिस्ट पर जाएं" के लिए कहें।', 'footer': "प्रियंशु द्वारा ❤️ के साथ बनाया गया"
     },
     'od': {
-        'hello': "ନମସ୍କାର",
-        'looking_for': "ଆଜି ଆପଣ କଣ ଖୋଜୁଛନ୍ତି?",
-        'placeholder': "ଉତ୍ପାଦର ନାମ ଦିଅନ୍ତୁ...",
-        'search_btn': "ସନ୍ଧାନ କରନ୍ତୁ",
-        'history_btn': "ଇତିହାସ",
-        'admin_btn': "ପ୍ରଶାସକ ପ୍ୟାନେଲ୍",
-        'logout_btn': "ଲଗ୍ ଆଉଟ୍",
-        'rec_title': "ଏହା ଉପରେ ଆଧାରିତ ସୁପାରିଶ",
-        'voice_listen': "ଶୁଣୁଛି...",
-        'ai_assistant': "AI ସହାୟକ",
-        'ask_me': 'ମୋତେ "ଫୋନ୍ ଖୋଜନ୍ତୁ" କିମ୍ବା "ୱିଶଲିଷ୍ଟକୁ ଯାଆନ୍ତୁ" ବୋଲି କୁହନ୍ତୁ |',
-        'footer': "ପ୍ରିୟାଂଶୁଙ୍କ ଦ୍ୱାରା ❤️ ସହିତ ତିଆରି"
+        'hello': "ନମସ୍କାର", 'looking_for': "ଆଜି ଆପଣ କଣ ଖୋଜୁଛନ୍ତି?", 'placeholder': "ଉତ୍ପାଦର ନାମ ଦିଅନ୍ତୁ...",
+        'search_btn': "ସନ୍ଧାନ କରନ୍ତୁ", 'history_btn': "ଇତିହାସ", 'admin_btn': "ପ୍ରଶାସକ ପ୍ୟାନେଲ୍", 'logout_btn': "ଲଗ୍ ଆଉଟ୍",
+        'rec_title': "ଏହା ଉପରେ ଆଧାରିତ ସୁପାରିଶ", 'voice_listen': "ଶୁଣୁଛି...", 'ai_assistant': "AI ସହାୟକ",
+        'ask_me': 'ମୋତେ "ଫୋନ୍ ଖୋଜନ୍ତୁ" କିମ୍ବା "ୱିଶଲିଷ୍ଟକୁ ଯାଆନ୍ତୁ" ବୋଲି କୁହନ୍ତୁ |', 'footer': "ପ୍ରିୟାଂଶୁଙ୍କ ଦ୍ୱାରା ❤️ ସହିତ ତିଆରି"
     }
 }
 
@@ -206,15 +182,13 @@ def reset_request():
             return redirect(url_for('reset_request'))
     return render_template('reset_request.html', step='email')
 
-# --- MAIN ROUTE WITH TRANSLATION ---
+# --- MAIN ROUTE ---
 @app.route("/")
 @login_required
 def index():
-    # 1. Get Selected Language (Default: English)
     lang = request.args.get('lang', 'en')
-    t = TRANSLATIONS.get(lang, TRANSLATIONS['en']) # Get dictionary for that language
+    t = TRANSLATIONS.get(lang, TRANSLATIONS['en']) 
 
-    # 2. Recommendation Logic
     recommendations = []
     last_search = SearchHistory.query.filter_by(user_id=current_user.id).order_by(SearchHistory.timestamp.desc()).first()
     query = "futuristic gadgets"
@@ -223,15 +197,22 @@ def index():
     try:
         params = {"engine": "google_shopping", "q": query, "hl": "en", "gl": "in", "api_key": SERP_API_KEY, "num": 3}
         data = requests.get("https://serpapi.com/search", params=params).json()
+        
         for item in data.get("shopping_results", [])[:3]:
+            # --- FIX: Handle Relative Links ---
+            link = item.get("link") or item.get("product_link")
+            if link and link.startswith("/"):
+                link = f"https://www.google.com{link}"
+            # ----------------------------------
+
             trust_score = get_ai_trust_score(item.get("title"), item.get("source", "Unknown"))
             recommendations.append({
                 "title": item.get("title"), "price": item.get("price", "N/A"), "image": item.get("thumbnail"),
-                "link": item.get("link"), "score": trust_score
+                "link": link, "score": trust_score
             })
-    except: pass
+    except Exception as e:
+        print(f"Error: {e}")
     
-    # 3. Pass translation dict 't' to the template
     return render_template("index.html", user=current_user, recommendations=recommendations, rec_topic=query, t=t, lang=lang)
 
 @app.route("/account")
