@@ -4,50 +4,84 @@
     <meta charset="UTF-8">
     <title>My Cart</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #1f242d; color: #fff; min-height: 100vh; padding: 40px; }
-        .cart-container { max-width: 900px; margin: 0 auto; background: rgba(31, 36, 45, 0.8); border: 2px solid #0ef; border-radius: 15px; padding: 30px; }
-        h1 { text-align: center; color: #0ef; margin-bottom: 30px; }
-        .cart-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .item-info { display: flex; align-items: center; gap: 20px; }
-        .item-img { width: 60px; height: 60px; object-fit: contain; background: #fff; border-radius: 5px; }
-        .item-details h3 { font-size: 1rem; margin-bottom: 5px; }
-        .item-price { color: #0ef; font-weight: bold; }
-        .remove-btn { color: #ff3333; font-size: 1.5rem; cursor: pointer; text-decoration: none; }
-        .total-section { text-align: right; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; }
-        .total-price { font-size: 1.5rem; font-weight: bold; color: #0ef; }
-        .checkout-btn { display: inline-block; margin-top: 15px; background: #0ef; color: #1f242d; padding: 12px 30px; border-radius: 8px; font-weight: bold; text-decoration: none; transition: 0.3s; }
-        .checkout-btn:hover { box-shadow: 0 0 15px #0ef; transform: translateY(-2px); }
-        .back-link { display: block; margin-top: 20px; color: #ccc; text-align: center; text-decoration: none; }
+        
+        :root { --bg-color: #1f242d; --surface-color: #262c36; --shadow-dark: rgba(0, 0, 0, 0.6); --shadow-light: rgba(255, 255, 255, 0.05); --neon: #0ef; }
+        
+        body { background: var(--bg-color); color: #fff; min-height: 100vh; padding: 40px; display: flex; justify-content: center; }
+        
+        .container { width: 100%; max-width: 800px; }
+        
+        h1 { text-align: center; color: var(--neon); margin-bottom: 40px; text-shadow: 0 0 10px var(--neon); }
+
+        .cart-item {
+            background: var(--surface-color); border-radius: 20px; padding: 20px;
+            margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .info { display: flex; align-items: center; gap: 20px; }
+        
+        .img-box {
+            width: 70px; height: 70px; border-radius: 15px; background: var(--surface-color);
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+            display: flex; justify-content: center; align-items: center; padding: 5px;
+        }
+        .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        .price { color: var(--neon); font-weight: bold; font-size: 1.1rem; }
+        
+        .remove-btn {
+            width: 40px; height: 40px; border-radius: 50%; background: var(--surface-color); color: #ff3333;
+            display: flex; justify-content: center; align-items: center; font-size: 1.2rem;
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+            text-decoration: none; transition: 0.2s;
+        }
+        .remove-btn:hover { color: #fff; background: #ff3333; box-shadow: 0 0 10px #ff3333; }
+
+        .total-section {
+            background: var(--surface-color); border-radius: 20px; padding: 30px; margin-top: 30px; text-align: right;
+            box-shadow: 10px 10px 20px var(--shadow-dark), -10px -10px 20px var(--shadow-light);
+        }
+        
+        .checkout-btn {
+            display: inline-block; margin-top: 15px; padding: 12px 30px; border-radius: 15px;
+            background: var(--surface-color); color: var(--neon); font-weight: bold; text-decoration: none;
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); transition: 0.2s;
+        }
+        .checkout-btn:hover { background: var(--neon); color: #1f242d; box-shadow: 0 0 20px var(--neon); }
+        
+        .back-link { display: block; text-align: center; margin-top: 30px; color: #888; text-decoration: none; }
+        .back-link:hover { color: var(--neon); }
     </style>
 </head>
 <body>
-    <div class="cart-container">
+    <div class="container">
         <h1>Shopping Cart</h1>
         {% if cart %}
             {% for item in cart %}
             <div class="cart-item">
-                <div class="item-info">
-                    <img src="{{ item.image }}" class="item-img">
-                    <div class="item-details">
+                <div class="info">
+                    <div class="img-box"><img src="{{ item.image }}"></div>
+                    <div>
                         <h3>{{ item.title }}</h3>
-                        <div class="item-price">{{ item.price }}</div>
+                        <div class="price">{{ item.price }}</div>
                     </div>
                 </div>
                 <a href="/remove_cart/{{ item.id }}" class="remove-btn"><ion-icon name="trash"></ion-icon></a>
             </div>
             {% endfor %}
             <div class="total-section">
-                <div>Total: <span class="total-price">₹{{ total }}</span></div>
+                <h2 style="color:#fff;">Total: <span style="color:var(--neon);">₹{{ total }}</span></h2>
                 <a href="/checkout" class="checkout-btn">Proceed to Pay & Download Invoice</a>
             </div>
         {% else %}
-            <div style="text-align: center; padding: 40px;">
-                <h2>Your cart is empty.</h2>
-                <a href="/" style="color: #0ef;">Go Shopping</a>
+            <div style="text-align:center; padding:50px;">
+                <h2 style="color:#888;">Your cart is empty.</h2>
+                <a href="/" style="color:var(--neon);">Go Shopping</a>
             </div>
         {% endif %}
         <a href="/" class="back-link">Back to Home</a>

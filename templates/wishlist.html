@@ -2,66 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Wishlist</title>
+    <title>Wishlist</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { min-height: 100vh; background: #1f242d; color: #fff; padding-bottom: 60px; }
-        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .header { padding: 30px 50px; display: flex; justify-content: space-between; align-items: center; background: rgba(31, 36, 45, 0.9); border-bottom: 1px solid #0ef; position: sticky; top: 0; z-index: 100; }
-        .header h1 span { color: #0ef; }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; padding: 40px 50px; }
-        .product-card { background: #323946; border: 2px solid rgba(0, 238, 255, 0.1); border-radius: 15px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 0 15px rgba(0,0,0,0.3); }
-        .product-card:hover { transform: translateY(-10px); border-color: #0ef; box-shadow: 0 0 20px rgba(0, 238, 255, 0.4); }
-        .img-container { width: 100%; height: 200px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 10px; margin-bottom: 15px; padding: 10px; }
-        .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .product-title { font-size: 1rem; margin-bottom: 10px; height: 45px; overflow: hidden; }
-        .price-tag { font-size: 1.5rem; color: #0ef; font-weight: 700; margin-bottom: 15px; }
-        .btn-group { display: flex; gap: 10px; }
-        .view-btn, .remove-btn { flex: 1; padding: 10px; text-align: center; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.3s; cursor: pointer; border: none;}
-        .view-btn { border: 2px solid #0ef; color: #fff; background: transparent; }
-        .view-btn:hover { background: #0ef; color: #1f242d; }
-        .remove-btn { background: rgba(255, 0, 0, 0.2); border: 1px solid red; color: #ff9999; }
-        .remove-btn:hover { background: red; color: white; }
-        .footer-info { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(31, 36, 45, 0.95); padding: 10px; text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); z-index: 10; border-top: 1px solid #0ef; }
-        .flash { margin: 20px 50px 0 50px; background: rgba(0,255,0,0.1); border: 1px solid #0f0; color: #0f0; border-radius: 10px; padding: 10px; text-align: center; }
+        
+        :root { --bg-color: #1f242d; --surface-color: #262c36; --shadow-dark: rgba(0, 0, 0, 0.6); --shadow-light: rgba(255, 255, 255, 0.05); --neon: #0ef; }
+        
+        body { background: var(--bg-color); color: #fff; min-height: 100vh; padding: 40px; }
+        h1 { text-align: center; color: var(--neon); margin-bottom: 40px; text-shadow: 0 0 10px var(--neon); }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px; }
+        
+        .card {
+            background: var(--surface-color); border-radius: 30px; padding: 25px;
+            box-shadow: 10px 10px 20px var(--shadow-dark), -10px -10px 20px var(--shadow-light);
+            text-align: center; transition: 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); }
+        
+        .img-box {
+            width: 100%; height: 160px; border-radius: 20px; background: var(--surface-color);
+            box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+            display: flex; justify-content: center; align-items: center; margin-bottom: 15px; padding: 10px;
+        }
+        .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        h3 { font-size: 1rem; height: 50px; overflow: hidden; }
+        .price { color: var(--neon); font-size: 1.2rem; font-weight: bold; margin: 10px 0; }
+        
+        .actions { display: flex; gap: 10px; justify-content: center; }
+        
+        .btn {
+            width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--surface-color);
+            color: #888; display: flex; justify-content: center; align-items: center; font-size: 1.2rem;
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+            cursor: pointer; text-decoration: none; transition: 0.2s;
+        }
+        .btn.buy:hover { color: var(--neon); }
+        .btn.del:hover { color: #ff3333; }
+        
+        .back-link { display: block; text-align: center; margin-top: 50px; color: #888; text-decoration: none; }
     </style>
 </head>
 <body>
-    <canvas id="bg-canvas"></canvas>
-    <div class="header"><h1>My <span>Wishlist</span></h1><a href="/" style="color:#fff; text-decoration:none; border:2px solid #0ef; padding:5px 15px; border-radius:5px;">Home</a></div>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}<div class="flash">{{ message }}</div>{% endfor %}
-        {% endif %}
-    {% endwith %}
-    <div class="grid-container">
+    <h1>My Wishlist</h1>
+    <div class="grid">
         {% if wishlist %}
             {% for item in wishlist %}
-            <div class="product-card">
-                <div class="img-container"><img src="{{ item.image }}" alt="Product Image" onerror="this.src='https://via.placeholder.com/200?text=No+Image'"></div>
-                <div><h3 class="product-title">{{ item.title }}</h3><div class="price-tag">{{ item.price }}</div></div>
-                <div class="btn-group">
-                    <a href="{{ item.link }}" target="_blank" class="view-btn">Buy</a>
-                    <a href="/remove_wishlist/{{ item.id }}" class="remove-btn">Remove</a>
+            <div class="card">
+                <div class="img-box"><img src="{{ item.image }}"></div>
+                <h3>{{ item.title }}</h3>
+                <div class="price">{{ item.price }}</div>
+                <div class="actions">
+                    <form action="/add_to_cart" method="POST">
+                        <input type="hidden" name="title" value="{{ item.title }}"><input type="hidden" name="price" value="{{ item.price }}"><input type="hidden" name="image" value="{{ item.image }}"><input type="hidden" name="store" value="{{ item.store }}">
+                        <button type="submit" class="btn buy"><ion-icon name="cart"></ion-icon></button>
+                    </form>
+                    <a href="/remove_wishlist/{{ item.id }}" class="btn del"><ion-icon name="trash"></ion-icon></a>
                 </div>
             </div>
             {% endfor %}
         {% else %}
-            <div style="grid-column: 1/-1; text-align: center; padding: 50px;"><h2 style="color: #888;">Your wishlist is empty.</h2></div>
+            <p style="text-align:center; grid-column:1/-1;">No items in wishlist.</p>
         {% endif %}
     </div>
-    <div class="footer-info">Made with ❤️ by <strong>Priyansu</strong> | pupuhari123@gmail.com</div>
-    <script>
-        const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
-        let particles = []; function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-        class Particle { constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5) * 1; this.vy = (Math.random() - 0.5) * 1; this.size = Math.random() * 2 + 1; } update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = '#0ef'; ctx.fill(); } }
-        for (let i = 0; i < 80; i++) particles.push(new Particle());
-        function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
-    </script>
+    <a href="/" class="back-link">Back to Home</a>
 </body>
 </html>

@@ -2,51 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Direct Reset</title>
+    <title>Reset Password</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: #1f242d; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: rgba(31, 36, 45, 0.75); border: 2px solid rgba(0, 238, 255, 0.1); border-radius: 20px; padding: 40px; text-align: center; width: 400px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); }
-        h2 { color: #0ef; margin-bottom: 20px; }
-        input { width: 100%; padding: 15px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid #fff; border-radius: 8px; color: #fff; outline: none; }
-        input:focus { border-color: #0ef; }
-        button { width: 100%; padding: 15px; background: #0ef; border: none; border-radius: 8px; font-weight: 600; color: #1f242d; cursor: pointer; transition: 0.3s; }
-        button:hover { box-shadow: 0 0 15px #0ef; }
-        a { color: #0ef; text-decoration: none; display: block; margin-top: 20px; }
-        .flash { color: #0f0; margin-bottom: 15px; border: 1px solid #0f0; padding: 10px; border-radius: 5px; background: rgba(0,255,0,0.1); }
-        .error { color: #ff3333; border-color: #ff3333; background: rgba(255,0,0,0.1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        :root { --bg-color: #1f242d; --surface-color: #262c36; --shadow-dark: rgba(0, 0, 0, 0.6); --shadow-light: rgba(255, 255, 255, 0.05); --neon: #0ef; }
+        
+        body { 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; 
+            background: var(--bg-color); color: #fff; 
+        }
+        
+        .wrapper { 
+            width: 400px; background: var(--surface-color); border-radius: 40px; padding: 40px;
+            box-shadow: 15px 15px 30px var(--shadow-dark), -10px -10px 30px var(--shadow-light);
+            text-align: center;
+        }
+        
+        h2 { color: var(--neon); margin-bottom: 30px; }
+        
+        .clay-input {
+            width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 15px; border: none; outline: none;
+            background: var(--surface-color); color: #fff;
+            box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+        }
+        
+        .clay-btn {
+            width: 100%; padding: 15px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer;
+            background: var(--surface-color); color: var(--neon);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            transition: 0.2s;
+        }
+        .clay-btn:hover { background: var(--neon); color: #1f242d; box-shadow: 0 0 20px var(--neon); }
+        
+        .back-link { display: block; margin-top: 20px; color: #888; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Reset Password</h2>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash {% if category == 'error' %}error{% endif %}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <form method="POST">
-            {% if step == 'email' %}
-                <p style="color:#ccc; margin-bottom:20px;">Enter your email to find your account.</p>
-                <input type="email" name="email" placeholder="Enter your email" required autofocus>
-                <button type="submit">Verify Email</button>
-            
-            {% else %}
-                <p style="color:#ccc; margin-bottom:20px;">Identity Verified. Set your new password.</p>
-                
+    <div class="wrapper">
+        {% if step == 'email' %}
+            <h2>Reset Password</h2>
+            <form method="POST">
+                <input type="email" name="email" class="clay-input" placeholder="Enter your email" required>
+                <button type="submit" class="clay-btn">Verify Email</button>
+            </form>
+        {% else %}
+            <h2>Set New Password</h2>
+            <form method="POST">
                 <input type="hidden" name="email" value="{{ email }}">
-                
-                <input type="password" name="password" placeholder="Enter New Password" required autofocus>
-                <button type="submit">Update Password</button>
-            {% endif %}
-        </form>
-
-        <a href="/login">Back to Login</a>
+                <input type="password" name="password" class="clay-input" placeholder="New Password" required>
+                <button type="submit" class="clay-btn">Change Password</button>
+            </form>
+        {% endif %}
+        
+        <a href="/login" class="back-link">Back to Login</a>
     </div>
 </body>
 </html>
