@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Future Shop</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -12,109 +15,123 @@
         :root {
             --bg-color: #1f242d;
             --surface-color: #262c36;
-            --shadow-light: rgba(255, 255, 255, 0.05);
-            --shadow-dark: rgba(0, 0, 0, 0.6);
             --neon: #0ef;
+            --shadow-dark: rgba(0, 0, 0, 0.6);
+            --shadow-light: rgba(255, 255, 255, 0.05);
         }
 
         body { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            flex-direction: column; /* Stacks items vertically */
-            min-height: 100vh; 
-            background: var(--bg-color); 
-            color: #fff; 
-            overflow: hidden; 
-            gap: 30px;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; 
+            background: var(--bg-color); color: #fff; overflow: hidden; position: relative;
         }
         
-        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        /* BACKGROUND GLOWING ORBS */
+        .orb {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; z-index: -1;
+            animation: float 10s infinite alternate;
+        }
+        .orb-1 { width: 300px; height: 300px; background: #0ef; top: 10%; left: 20%; }
+        .orb-2 { width: 200px; height: 200px; background: #ff0055; bottom: 20%; right: 20%; animation-delay: -5s; }
+        
+        @keyframes float { 
+            0% { transform: translate(0, 0); } 
+            100% { transform: translate(30px, 50px); } 
+        }
 
-        /* --- FIXED HEADER CENTERING --- */
+        /* HEADER */
         .site-header {
-            text-align: center; /* Forces text to center */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
+            position: absolute; top: 50px; text-align: center; width: 100%; z-index: 10;
         }
-
         .site-header h1 { 
-            font-size: 3rem; 
-            color: #fff; 
-            text-shadow: 0 0 10px var(--neon); 
-            margin-bottom: 10px; 
-            text-align: center; 
+            font-size: 3.5rem; color: #fff; text-shadow: 0 0 20px var(--neon); letter-spacing: 2px;
         }
+        .site-header p { color: #ccc; font-size: 1rem; letter-spacing: 1px; }
 
-        .site-header p { 
-            color: #ccc; 
-            max-width: 500px; 
-            text-align: center; 
-            line-height: 1.5;
-        }
-
-        /* CLAY CARD */
+        /* 3D CLAY CARD */
         .wrapper { 
-            position: relative; width: 400px; height: 500px; 
-            background: var(--surface-color); border-radius: 40px;
-            box-shadow: 15px 15px 30px var(--shadow-dark), -10px -10px 30px var(--shadow-light);
-            overflow: hidden; padding: 40px;
-            display: flex; /* Helps center form content */
-            flex-direction: column;
+            position: relative; width: 420px; height: 550px; 
+            background: rgba(38, 44, 54, 0.8); /* Semi-transparent for Glass effect */
+            border-radius: 40px;
+            box-shadow: 20px 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+            overflow: hidden; padding: 50px 40px;
+            transform-style: preserve-3d;
         }
         
+        /* SLIDING MECHANISM */
         .form-box { 
-            position: absolute; 
-            width: 100%; 
-            padding-right: 80px; /* Accounts for padding of wrapper */
-            transition: 0.5s; 
-            left: 0; 
+            position: absolute; width: 100%; height: 100%; 
+            transition: 0.5s ease-in-out; top: 0; padding: 50px 40px; 
+            display: flex; flex-direction: column; justify-content: center;
         } 
         
-        .form-box.login { left: 40px; }
-        .form-box.register { left: 450px; }
+        /* Login is default visible */
+        .form-box.login { left: 0; }
+        .form-box.register { left: 100%; } /* Pushed to right */
         
-        .wrapper.active .form-box.login { left: -450px; }
-        .wrapper.active .form-box.register { left: 40px; }
+        /* When Active (Show Register) */
+        .wrapper.active .form-box.login { left: -100%; }
+        .wrapper.active .form-box.register { left: 0; }
 
         h2 { 
-            margin-bottom: 30px; 
-            color: var(--neon); 
-            text-align: center; 
-            text-shadow: 0 0 5px var(--neon); 
-            width: 100%;
+            font-size: 2rem; color: var(--neon); text-align: center; margin-bottom: 30px; 
+            text-shadow: 0 0 10px var(--neon); 
         }
 
-        /* CLAY INPUTS (Pressed) */
-        .clay-input {
-            width: 100%; padding: 15px; margin-bottom: 20px;
-            border-radius: 15px; border: none; outline: none;
-            background: var(--surface-color); color: #fff;
-            box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+        /* INPUT GROUP WITH ICON */
+        .input-group {
+            position: relative; width: 100%; margin-bottom: 25px;
         }
-
-        /* CLAY BUTTON (Floating) */
-        .clay-btn {
-            width: 100%; padding: 15px; border-radius: 20px;
-            border: none; font-weight: bold; cursor: pointer;
-            background: var(--surface-color); color: var(--neon);
-            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
-            transition: 0.2s;
-        }
-        .clay-btn:hover { background: var(--neon); color: #1f242d; box-shadow: 0 0 20px var(--neon); }
-        .clay-btn:active { box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light); }
-
-        .toggle-link { text-align: center; margin-top: 20px; font-size: 0.9rem; color: #888; }
-        .toggle-link b { color: var(--neon); cursor: pointer; }
         
-        .flash { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--surface-color); color: var(--neon); padding: 10px 20px; border-radius: 10px; box-shadow: 0 0 10px var(--neon); z-index: 100; border: 1px solid var(--neon); }
+        .input-group input {
+            width: 100%; padding: 15px 50px 15px 20px; 
+            background: var(--surface-color); border-radius: 15px; border: none; outline: none;
+            color: #fff; font-size: 1rem;
+            box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+            transition: 0.3s;
+        }
+        .input-group input:focus {
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light), 0 0 10px var(--neon);
+            color: var(--neon);
+        }
+        
+        .input-group ion-icon {
+            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+            font-size: 1.2rem; color: #888; transition: 0.3s;
+        }
+        .input-group input:focus ~ ion-icon { color: var(--neon); }
+
+        /* NEON BUTTON */
+        .btn {
+            width: 100%; height: 50px; border-radius: 40px; background: var(--surface-color);
+            border: none; outline: none; cursor: pointer; font-size: 1.1rem; font-weight: 600; color: var(--neon);
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            transition: 0.3s; margin-top: 10px;
+        }
+        .btn:hover {
+            background: var(--neon); color: #1f242d;
+            box-shadow: 0 0 20px var(--neon); transform: scale(1.02);
+        }
+
+        .toggle-link { text-align: center; margin-top: 25px; font-size: 0.9rem; color: #ccc; }
+        .toggle-link b { color: var(--neon); cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .toggle-link b:hover { text-shadow: 0 0 10px var(--neon); text-decoration: underline; }
+        
+        .flash { 
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
+            background: rgba(31, 36, 45, 0.9); color: var(--neon); border: 1px solid var(--neon);
+            padding: 15px 30px; border-radius: 20px; z-index: 100; backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.3); animation: slideDown 0.5s ease;
+        }
+        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
     </style>
 </head>
 <body>
-    <canvas id="bg-canvas"></canvas>
-    
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}<div class="flash">{{ message }}</div>{% endfor %}
@@ -123,19 +140,32 @@
 
     <div class="site-header">
         <h1>FUTURE SHOP</h1>
-        <p>Login to experience the next generation of AI shopping.</p>
+        <p>Experience the Next Generation</p>
     </div>
 
-    <div class="wrapper">
+    <div class="wrapper" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+        
         <div class="form-box login">
             <h2>Login</h2>
             <form action="/login" method="POST">
                 <input type="hidden" name="action" value="login">
-                <input type="text" name="username" class="clay-input" placeholder="Username or Email" required>
-                <input type="password" name="password" class="clay-input" placeholder="Password" required>
-                <button type="submit" class="clay-btn">Login</button>
-                <p class="toggle-link">Don't have an account? <b class="register-link">Sign Up</b></p>
-                <p class="toggle-link"><a href="/reset_password" style="text-decoration:none; color:#888;">Forgot Password?</a></p>
+                
+                <div class="input-group">
+                    <input type="text" name="username" placeholder="Username" required>
+                    <ion-icon name="person"></ion-icon>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" name="password" placeholder="Password" required>
+                    <ion-icon name="lock-closed"></ion-icon>
+                </div>
+
+                <button type="submit" class="btn">Login</button>
+                
+                <div class="toggle-link">
+                    <p>Don't have an account? <b class="register-link">Sign Up</b></p>
+                    <p style="margin-top:10px;"><a href="/reset_password" style="color:#888; text-decoration:none; font-size:0.8rem;">Forgot Password?</a></p>
+                </div>
             </form>
         </div>
 
@@ -143,27 +173,47 @@
             <h2>Sign Up</h2>
             <form action="/login" method="POST">
                 <input type="hidden" name="action" value="register">
-                <input type="text" name="username" class="clay-input" placeholder="Username" required>
-                <input type="email" name="email" class="clay-input" placeholder="Email" required>
-                <input type="password" name="password" class="clay-input" placeholder="Password" required>
-                <button type="submit" class="clay-btn">Register</button>
-                <p class="toggle-link">Already have an account? <b class="login-link">Login</b></p>
+                
+                <div class="input-group">
+                    <input type="text" name="username" placeholder="Username" required>
+                    <ion-icon name="person"></ion-icon>
+                </div>
+                
+                <div class="input-group">
+                    <input type="email" name="email" placeholder="Email" required>
+                    <ion-icon name="mail"></ion-icon>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" name="password" placeholder="Password" required>
+                    <ion-icon name="lock-closed"></ion-icon>
+                </div>
+
+                <button type="submit" class="btn">Register</button>
+                
+                <div class="toggle-link">
+                    <p>Already have an account? <b class="login-link">Login</b></p>
+                </div>
             </form>
         </div>
     </div>
 
     <script>
+        // SLIDING LOGIC
         const wrapper = document.querySelector('.wrapper');
-        document.querySelector('.register-link').onclick = () => wrapper.classList.add('active');
-        document.querySelector('.login-link').onclick = () => wrapper.classList.remove('active');
+        const loginLink = document.querySelector('.login-link');
+        const registerLink = document.querySelector('.register-link');
 
-        // PARTICLES
-        const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
-        let particles = []; function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-        class Particle { constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.vx = (Math.random() - 0.5); this.vy = (Math.random() - 0.5); this.size = Math.random() * 2 + 1; } update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = '#0ef'; ctx.fill(); } }
-        for (let i = 0; i < 60; i++) particles.push(new Particle());
-        function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
+        registerLink.onclick = () => { wrapper.classList.add('active'); };
+        loginLink.onclick = () => { wrapper.classList.remove('active'); };
+
+        // INITIALIZE TILT
+        VanillaTilt.init(document.querySelector(".wrapper"), {
+            max: 15,
+            speed: 400,
+            glare: true,
+            "max-glare": 0.2,
+        });
     </script>
 </body>
 </html>
