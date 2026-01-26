@@ -11,242 +11,101 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
         body { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            flex-direction: column; /* Stacks Title above Box */
-            min-height: 100vh; 
-            background: #1f242d; 
-            color: #fff; 
-            overflow: hidden;
-            gap: 30px; /* Space between text and login box */
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            min-height: 100vh; background: #eef2f5; /* Light Background for Clay */
+            color: #333; overflow: hidden; gap: 30px;
         }
 
-        /* --- NEW: SITE HEADER --- */
-        .site-header {
-            text-align: center;
-            z-index: 10;
-            animation: fadeInDown 1s ease-out;
-        }
-        
-        .site-header h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: #fff;
-            text-shadow: 0 0 10px #0ef, 0 0 20px #0ef; /* Neon Glow */
-            margin-bottom: 10px;
+        /* CLAYMORPHISM CARD STYLE */
+        .clay-card {
+            background: #fff;
+            border-radius: 30px;
+            box-shadow: 
+                8px 8px 16px #d1d9e6, 
+                -8px -8px 16px #ffffff; /* Soft outer shadow */
+            padding: 40px;
+            border: none;
         }
 
-        .site-header p {
-            font-size: 1rem;
-            color: #ccc;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-            background: rgba(0, 0, 0, 0.3); /* Slight background for readability */
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: 1px solid rgba(0, 238, 255, 0.1);
+        /* CLAY INPUTS */
+        .clay-input {
+            width: 100%; padding: 15px; margin-bottom: 20px;
+            border-radius: 15px; border: none; outline: none;
+            background: #eef2f5;
+            box-shadow: inset 5px 5px 10px #d1d9e6, inset -5px -5px 10px #ffffff; /* Inner shadow for depth */
+            color: #555;
         }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* CLAY BUTTON */
+        .clay-btn {
+            width: 100%; padding: 15px; border-radius: 20px;
+            border: none; font-weight: bold; cursor: pointer;
+            background: #0ef; color: #fff;
+            box-shadow: 5px 5px 10px #a3e4ea, -5px -5px 10px #ffffff;
+            transition: 0.2s;
+        }
+        .clay-btn:active {
+            box-shadow: inset 5px 5px 10px #8bc9ce, inset -5px -5px 10px #ffffff; /* Press effect */
+            transform: scale(0.98);
         }
 
-        /* PARTICLE CANVAS */
-        #bg-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-        }
+        .site-header h1 { font-size: 3rem; color: #333; text-shadow: 2px 2px 0px #fff; margin-bottom: 10px; }
+        .site-header p { color: #666; max-width: 500px; text-align: center; }
 
-        /* LOGIN WRAPPER */
         .wrapper { 
-            position: relative; width: 400px; height: 450px; 
-            background: transparent; border: 2px solid rgba(255,255,255,0.5); 
-            border-radius: 20px; backdrop-filter: blur(15px); 
-            display: flex; justify-content: center; align-items: center; 
-            overflow: hidden; transition: height .2s ease;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            z-index: 10;
+            position: relative; width: 400px; height: 500px; 
+            overflow: hidden; 
         }
         
-        .wrapper.active { height: 520px; }
+        .form-box { position: absolute; width: 100%; transition: 0.5s; }
+        .form-box.login { left: 0; }
+        .form-box.register { left: 400px; }
+        .wrapper.active .form-box.login { left: -400px; }
+        .wrapper.active .form-box.register { left: 0; }
 
-        .wrapper .form-box { width: 100%; padding: 40px; }
-        
-        /* SLIDE / FLIP ANIMATION */
-        .wrapper .form-box.login { transition: transform .18s ease; transform: translateX(0); }
-        .wrapper.active .form-box.login { transition: none; transform: translateX(-400px); }
-        
-        .wrapper .form-box.register { position: absolute; transform: translateX(400px); transition: none; }
-        .wrapper.active .form-box.register { transition: transform .18s ease; transform: translateX(0); }
-
-        h2 { font-size: 2em; color: #fff; text-align: center; }
-
-        .input-box { position: relative; width: 100%; height: 50px; border-bottom: 2px solid #fff; margin: 30px 0; }
-        .input-box label { position: absolute; top: 50%; left: 5px; transform: translateY(-50%); font-size: 1em; color: #fff; pointer-events: none; transition: .5s; }
-        .input-box input:focus ~ label, .input-box input:valid ~ label { top: -5px; color: #0ef; }
-        .input-box input { width: 100%; height: 100%; background: transparent; border: none; outline: none; font-size: 1em; color: #fff; padding: 0 35px 0 5px; }
-        .input-box .icon { position: absolute; right: 8px; font-size: 1.2em; color: #fff; line-height: 57px; }
-
-        .btn { width: 100%; height: 45px; background: #0ef; border: none; outline: none; border-radius: 6px; cursor: pointer; font-size: 1em; color: #1f242d; font-weight: 500; transition: .5s; }
-        .btn:hover { box-shadow: 0 0 10px #0ef; }
-        
-        .login-register { font-size: .9em; color: #fff; text-align: center; margin-top: 25px; }
-        .login-register p a { color: #0ef; font-weight: 600; text-decoration: none; }
-        .login-register p a:hover { text-decoration: underline; }
-
-        .flash { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #fff; color: #333; padding: 10px 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.2); z-index: 100; }
-        .flash.error { border-left: 5px solid #ff3333; color: #ff3333; }
-        .flash.success { border-left: 5px solid #0ef; color: #008f8f; }
-        
-        .forgot-pass { margin: -15px 0 15px; display: block; text-align: right; font-size: 0.9em; }
-        .forgot-pass a { color: #fff; text-decoration: none; }
-        .forgot-pass a:hover { color: #0ef; text-decoration: underline; }
+        h2 { margin-bottom: 20px; color: #333; text-align: center; }
+        .toggle-link { text-align: center; margin-top: 15px; font-size: 0.9rem; color: #666; cursor: pointer; }
+        .toggle-link b { color: #0ef; }
     </style>
 </head>
 <body>
-    
-    <canvas id="bg-canvas"></canvas>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
 
     <div class="site-header">
         <h1>FUTURE SHOP</h1>
-        <p>
-            Experience the next generation of shopping. 
-            Compare prices across platforms, check AI-powered Trust Scores, 
-            and track price history to grab the best deals instantly.
-        </p>
+        <p>Experience the softest, smartest shopping platform. Compare prices and check AI Trust Scores with style.</p>
     </div>
 
-    <div class="wrapper">
+    <div class="wrapper clay-card">
+        
         <div class="form-box login">
             <h2>Login</h2>
             <form action="/login" method="POST">
                 <input type="hidden" name="action" value="login">
-                
-                <div class="input-box">
-                    <span class="icon"><ion-icon name="person"></ion-icon></span>
-                    <input type="text" name="username" required>
-                    <label>Username or Email</label>
-                </div>
-                
-                <div class="input-box">
-                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                    <input type="password" name="password" required>
-                    <label>Password</label>
-                </div>
-
-                <div class="forgot-pass">
-                    <a href="/reset_password">Forgot Password?</a>
-                </div>
-
-                <button type="submit" class="btn">Login</button>
-                
-                <div class="login-register">
-                    <p>Don't have an account? <a href="#" class="register-link">Register</a></p>
-                </div>
+                <input type="text" name="username" class="clay-input" placeholder="Username or Email" required>
+                <input type="password" name="password" class="clay-input" placeholder="Password" required>
+                <button type="submit" class="clay-btn">Login</button>
+                <p class="toggle-link">Don't have an account? <b class="register-link">Sign Up</b></p>
+                <p class="toggle-link"><a href="/reset_password" style="text-decoration:none; color:#888;">Forgot Password?</a></p>
             </form>
         </div>
 
         <div class="form-box register">
-            <h2>Registration</h2>
+            <h2>Sign Up</h2>
             <form action="/login" method="POST">
                 <input type="hidden" name="action" value="register">
-                
-                <div class="input-box">
-                    <span class="icon"><ion-icon name="person"></ion-icon></span>
-                    <input type="text" name="username" required>
-                    <label>Username</label>
-                </div>
-                
-                <div class="input-box">
-                    <span class="icon"><ion-icon name="mail"></ion-icon></span>
-                    <input type="email" name="email" required>
-                    <label>Email</label>
-                </div>
-                
-                <div class="input-box">
-                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                    <input type="password" name="password" required>
-                    <label>Password</label>
-                </div>
-                
-                <button type="submit" class="btn">Register</button>
-                
-                <div class="login-register">
-                    <p>Already have an account? <a href="#" class="login-link">Login</a></p>
-                </div>
+                <input type="text" name="username" class="clay-input" placeholder="Username" required>
+                <input type="email" name="email" class="clay-input" placeholder="Email" required>
+                <input type="password" name="password" class="clay-input" placeholder="Password" required>
+                <button type="submit" class="clay-btn">Register</button>
+                <p class="toggle-link">Already have an account? <b class="login-link">Login</b></p>
             </form>
         </div>
     </div>
 
     <script>
-        // --- 1. SLIDE / FLIP LOGIC ---
         const wrapper = document.querySelector('.wrapper');
-        const loginLink = document.querySelector('.login-link');
-        const registerLink = document.querySelector('.register-link');
-
-        registerLink.addEventListener('click', ()=> {
-            wrapper.classList.add('active');
-        });
-
-        loginLink.addEventListener('click', ()=> {
-            wrapper.classList.remove('active');
-        });
-
-        // --- 2. PARTICLE BACKGROUND LOGIC ---
-        const canvas = document.getElementById('bg-canvas'); 
-        const ctx = canvas.getContext('2d');
-        let particles = []; 
-        
-        function resize() { 
-            canvas.width = window.innerWidth; 
-            canvas.height = window.innerHeight; 
-        }
-        window.addEventListener('resize', resize); 
-        resize();
-        
-        class Particle { 
-            constructor() { 
-                this.x = Math.random() * canvas.width; 
-                this.y = Math.random() * canvas.height; 
-                this.vx = (Math.random() - 0.5) * 1.5; 
-                this.vy = (Math.random() - 0.5) * 1.5; 
-                this.size = Math.random() * 2 + 1; 
-            } 
-            update() { 
-                this.x += this.vx; 
-                this.y += this.vy; 
-                if (this.x < 0 || this.x > canvas.width) this.vx *= -1; 
-                if (this.y < 0 || this.y > canvas.height) this.vy *= -1; 
-            } 
-            draw() { 
-                ctx.beginPath(); 
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); 
-                ctx.fillStyle = '#0ef'; 
-                ctx.fill(); 
-            } 
-        }
-        
-        for (let i = 0; i < 100; i++) particles.push(new Particle());
-        
-        function animate() { 
-            ctx.clearRect(0, 0, canvas.width, canvas.height); 
-            particles.forEach(p => { 
-                p.update(); 
-                p.draw(); 
-            }); 
-            requestAnimationFrame(animate); 
-        } 
-        animate();
+        document.querySelector('.register-link').onclick = () => wrapper.classList.add('active');
+        document.querySelector('.login-link').onclick = () => wrapper.classList.remove('active');
     </script>
 </body>
 </html>
