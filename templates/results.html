@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results</title>
+    <title>Results - Future Shop</title>
+    
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,29 +13,68 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { min-height: 100vh; background: #1f242d; color: #fff; padding-bottom: 60px; }
+        
+        body { 
+            min-height: 100vh; background: #1f242d; color: #fff; padding-bottom: 60px; 
+            overflow-x: hidden;
+        }
+        
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
         
-        .results-header { padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; background: rgba(31, 36, 45, 0.9); border-bottom: 1px solid #0ef; position: sticky; top: 0; z-index: 100; }
+        /* HEADER */
+        .results-header { 
+            padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(31, 36, 45, 0.9); border-bottom: 1px solid #0ef; 
+            position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px);
+        }
         .results-header h1 span { color: #0ef; text-shadow: 0 0 10px #0ef; }
+        
         .controls { display: flex; align-items: center; gap: 15px; }
-        .new-search-btn { color:#0ef; text-decoration:none; border:1px solid #0ef; padding:5px 15px; border-radius:5px; transition: 0.3s; }
-        .new-search-btn:hover { background: #0ef; color: #1f242d; }
+        .new-search-btn { 
+            color:#0ef; text-decoration:none; border:1px solid #0ef; 
+            padding:8px 20px; border-radius:5px; transition: 0.3s; font-weight: 500;
+        }
+        .new-search-btn:hover { background: #0ef; color: #1f242d; box-shadow: 0 0 10px #0ef; }
         
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; padding: 40px 50px; }
+        /* GRID LAYOUT */
+        .grid-container { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 30px; padding: 40px 50px; 
+        }
         
+        /* CARD FLIP EFFECT */
         .card-perspective { perspective: 1000px; height: 500px; }
-        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; }
+        .card-inner { 
+            position: relative; width: 100%; height: 100%; text-align: center; 
+            transition: transform 0.8s; transform-style: preserve-3d; 
+        }
         .card-inner.flipped { transform: rotateY(180deg); }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; background: #323946; border: 2px solid rgba(0, 238, 255, 0.1); border-radius: 15px; padding: 20px; box-shadow: 0 0 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; }
-        .card-back { transform: rotateY(180deg); background: rgba(31, 36, 45, 0.95); }
         
-        .img-container { width: 100%; height: 160px; display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 10px; margin-bottom: 10px; padding: 10px; }
+        .card-front, .card-back { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+            background: #323946; border: 2px solid rgba(0, 238, 255, 0.1); 
+            border-radius: 15px; padding: 20px; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.3); 
+            display: flex; flex-direction: column; justify-content: space-between; 
+        }
+        .card-back { transform: rotateY(180deg); background: rgba(31, 36, 45, 0.98); }
+        
+        /* CARD CONTENT */
+        .img-container { 
+            width: 100%; height: 160px; display: flex; justify-content: center; align-items: center; 
+            background: #fff; border-radius: 10px; margin-bottom: 10px; padding: 10px; 
+        }
         .img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
         .product-title { font-size: 0.95rem; margin-bottom: 5px; height: 42px; overflow: hidden; line-height: 1.4; }
         .price-tag { font-size: 1.4rem; color: #0ef; font-weight: 700; margin-bottom: 5px; }
+        .store-badge { 
+            position: absolute; top: 10px; right: 10px; 
+            background: #0ef; color: #1f242d; font-size: 0.8rem; font-weight: bold; 
+            padding: 4px 10px; border-radius: 20px; z-index: 5; 
+        }
 
-        /* COMPARE LABEL */
+        /* COMPARE CHECKBOX */
         .compare-label {
             position: absolute; top: 10px; left: 10px; z-index: 20;
             display: flex; align-items: center; gap: 8px;
@@ -56,31 +96,41 @@
         }
         @keyframes popUp { from { bottom: -50px; opacity: 0; } to { bottom: 30px; opacity: 1; } }
 
-        /* AI SCORE */
+        /* AI SCORE BARS */
         .ai-score-box { margin-bottom: 12px; text-align: left; }
         .ai-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: #ccc; margin-bottom: 3px; }
         .ai-text { font-weight: bold; }
         .ai-bar-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
         .ai-bar { height: 100%; border-radius: 3px; width: 0%; transition: width 1s ease-in-out; }
 
-        /* BUTTONS */
+        /* ACTION BUTTONS */
         .action-row { display: flex; gap: 8px; align-items: center; }
-        .btn { flex: 1; padding: 10px; border-radius: 8px; font-weight: 600; text-decoration: none; cursor: pointer; border: 2px solid #0ef; display: flex; justify-content: center; align-items: center; }
+        .btn { 
+            flex: 1; padding: 10px; border-radius: 8px; font-weight: 600; 
+            text-decoration: none; cursor: pointer; border: 2px solid #0ef; 
+            display: flex; justify-content: center; align-items: center; transition: 0.3s;
+        }
         .view-btn { background: transparent; color: #fff; } .view-btn:hover { background: #0ef; color: #1f242d; }
-        .graph-btn { background: rgba(0, 238, 255, 0.1); color: #0ef; }
-        .wishlist-btn { width: 42px; padding: 0; background: transparent; color: #0ef; }
+        .graph-btn { background: rgba(0, 238, 255, 0.1); color: #0ef; } .graph-btn:hover { background: #0ef; color: #1f242d; }
+        .wishlist-btn { width: 42px; padding: 0; background: transparent; color: #0ef; } .wishlist-btn:hover { background: #0ef; color: #1f242d; }
         
-        /* NEW: QR SHARE BUTTON */
         .share-btn { width: 42px; padding: 0; background: transparent; color: #cc00ff; border-color: #cc00ff; }
         .share-btn:hover { background: #cc00ff; color: #fff; box-shadow: 0 0 10px #cc00ff; }
 
         .chart-container { width: 100%; height: 250px; display: flex; align-items: center; justify-content: center; }
         .back-btn { width: 100%; background: #0ef; color: #1f242d; border: none; margin-top: 10px; }
-        .footer-info { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(31, 36, 45, 0.95); padding: 10px; text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); z-index: 10; border-top: 1px solid #0ef; }
+        
+        /* FOOTER */
+        .footer-info { 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: rgba(31, 36, 45, 0.95); padding: 10px; 
+            text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); 
+            z-index: 10; border-top: 1px solid #0ef; 
+        }
+        
         .flash { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.8); color: #0f0; border: 1px solid #0f0; padding: 10px 20px; border-radius: 5px; z-index: 200; }
-        .store-badge { position: absolute; top: 10px; right: 10px; background: #0ef; color: #1f242d; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 20px; z-index: 5; }
 
-        /* --- QR MODAL STYLES --- */
+        /* QR CODE MODAL */
         .modal {
             display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
@@ -102,6 +152,7 @@
 </head>
 <body>
     <canvas id="bg-canvas"></canvas>
+    
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}<div class="flash">{{ message }}</div>{% endfor %}
@@ -111,6 +162,7 @@
     <div class="results-header">
         <h1>Results for: <span>"{{ product }}"</span></h1>
         <div class="controls">
+            <a href="/cart" class="new-search-btn" style="margin-right:10px;">My Cart</a>
             <a href="/" class="new-search-btn">New Search</a>
         </div>
     </div>
@@ -120,6 +172,7 @@
             {% for item in results %}
             <div class="card-perspective">
                 <div class="card-inner" id="card-{{ loop.index }}">
+                    
                     <div class="card-front">
                         
                         <div class="compare-label" onclick="toggleCheckbox('check-{{ loop.index }}')">
@@ -142,20 +195,36 @@
                                 <div class="ai-bar-container"><div class="ai-bar"></div></div>
                             </div>
                         </div>
+
                         <div class="action-row">
-                            <a href="{{ item.link }}" target="_blank" class="btn view-btn">Buy</a>
-                            <button type="button" class="btn graph-btn" onclick="showGraph('{{ loop.index }}', '{{ item.price_value }}')"><ion-icon name="stats-chart" style="font-size: 1.2rem;"></ion-icon></button>
+                            
+                            <form action="/add_to_cart" method="POST" style="flex:1; margin:0;">
+                                <input type="hidden" name="title" value="{{ item.title }}">
+                                <input type="hidden" name="price" value="{{ item.price }}">
+                                <input type="hidden" name="image" value="{{ item.thumbnail }}">
+                                <input type="hidden" name="store" value="{{ item.store }}">
+                                <button type="submit" class="btn view-btn" style="width:100%;">Add Cart</button>
+                            </form>
+
+                            <button type="button" class="btn graph-btn" onclick="showGraph('{{ loop.index }}', '{{ item.price_value }}')">
+                                <ion-icon name="stats-chart" style="font-size: 1.2rem;"></ion-icon>
+                            </button>
                             
                             <button type="button" class="btn share-btn" onclick="openQR('{{ item.link }}')">
                                 <ion-icon name="qr-code-outline" style="font-size: 1.2rem;"></ion-icon>
                             </button>
 
                             <form action="/add_to_wishlist" method="POST" style="margin: 0;">
-                                <input type="hidden" name="title" value="{{ item.title }}"><input type="hidden" name="price" value="{{ item.price }}"><input type="hidden" name="link" value="{{ item.link }}"><input type="hidden" name="image" value="{{ item.thumbnail }}"><input type="hidden" name="store" value="{{ item.store }}">
+                                <input type="hidden" name="title" value="{{ item.title }}">
+                                <input type="hidden" name="price" value="{{ item.price }}">
+                                <input type="hidden" name="link" value="{{ item.link }}">
+                                <input type="hidden" name="image" value="{{ item.thumbnail }}">
+                                <input type="hidden" name="store" value="{{ item.store }}">
                                 <button type="submit" class="btn wishlist-btn"><ion-icon name="heart" style="font-size: 1.5rem;"></ion-icon></button>
                             </form>
                         </div>
                     </div>
+
                     <div class="card-back">
                         <h3 style="color: #0ef; font-size: 1rem; margin-bottom: 10px;">Price History (7 Days)</h3>
                         <div class="chart-container"><canvas id="chart-{{ loop.index }}"></canvas></div>
@@ -187,6 +256,7 @@
     <div class="footer-info">Made with ❤️ by <strong>Priyansu</strong> | pupuhari123@gmail.com</div>
 
     <script>
+        // --- 1. PARTICLE BACKGROUND ---
         const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
         let particles = []; function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize); resize();
@@ -194,33 +264,21 @@
         for (let i = 0; i < 80; i++) particles.push(new Particle());
         function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
         
-        // --- QR CODE LOGIC ---
+        // --- 2. QR CODE GENERATION ---
         function openQR(link) {
             const modal = document.getElementById('qrModal');
             const container = document.getElementById('qrcode');
-            container.innerHTML = ""; // Clear previous QR
-            
-            // Generate New QR
+            container.innerHTML = ""; 
             new QRCode(container, {
-                text: link,
-                width: 200,
-                height: 200,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
+                text: link, width: 200, height: 200,
+                colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
             });
-            
             modal.style.display = "flex";
         }
         function closeQR() { document.getElementById('qrModal').style.display = "none"; }
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('qrModal');
-            if (event.target == modal) { modal.style.display = "none"; }
-        }
+        window.onclick = function(event) { if (event.target == document.getElementById('qrModal')) { closeQR(); } }
 
-        // --- AI SCORE COLOR LOGIC ---
+        // --- 3. AI SCORE COLOR LOGIC ---
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('.ai-score-box').forEach(box => {
                 const score = parseInt(box.dataset.score);
@@ -234,7 +292,7 @@
             });
         });
 
-        // --- COMPARISON LOGIC ---
+        // --- 4. COMPARISON LOGIC ---
         let selectedProducts = [];
         function toggleCheckbox(id) { const checkbox = document.getElementById(id); checkbox.checked = !checkbox.checked; handleSelection(checkbox); }
         function handleSelection(checkbox) {
@@ -260,7 +318,7 @@
             document.getElementById('compareForm').submit();
         }
 
-        // --- GRAPH LOGIC ---
+        // --- 5. PRICE HISTORY GRAPH ---
         let chartInstances = {};
         function showGraph(index, currentPrice) {
             document.getElementById(`card-${index}`).classList.add('flipped');

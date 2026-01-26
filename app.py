@@ -2,20 +2,22 @@ import os
 import requests
 import json
 import random
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+import io
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from textblob import TextBlob
 from sqlalchemy import func
+from xhtml2pdf import pisa # NEW: For PDF Generation
 
 app = Flask(__name__)
 
 # --- 1. CONFIGURATION ---
 SERP_API_KEY = "d66eccb121b3453152187f2442537b0fe5b3c82c4b8d4d56b89ed4d52c9f01a6"
 
-# Database Config (Neon + Local Fallback)
+# Database Config
 NEON_DB_URL = "postgresql://neondb_owner:npg_d3OshXYJxvl6@ep-misty-hat-a1bla5w6.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
 
 database_url = os.environ.get('DATABASE_URL')
@@ -29,12 +31,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'future_shop_secret_key_999')
 
-# Initialize Extensions
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-login_manager.login_message = None  # Disables the "Please log in..." flash message
+login_manager.login_message = None
 
 # --- 2. DATABASE MODELS ---
 class User(UserMixin, db.Model):
@@ -59,6 +60,16 @@ class Wishlist(db.Model):
     image = db.Column(db.String(500))
     store = db.Column(db.String(100))
 
+# NEW: Shopping Cart Model
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    title = db.Column(db.String(500), nullable=False)
+    price = db.Column(db.String(100))
+    price_val = db.Column(db.Float, default=0.0) # Numeric price for calculation
+    image = db.Column(db.String(500))
+    store = db.Column(db.String(100))
+
 # Create Tables
 with app.app_context():
     db.create_all()
@@ -71,49 +82,36 @@ def load_user(user_id):
 def extract_price(p):
     if not p: return 0
     try:
-        return int(float(p.replace("₹", "").replace(",", "").strip().split()[0])) 
+        # Removes currency symbols and commas to get a clean number
+        return float(p.replace("₹", "").replace("$", "").replace(",", "").strip().split()[0]) 
     except:
         return 0
 
 def get_ai_trust_score(product_title, store):
-    """
-    Simulates fetching reviews and running Sentiment Analysis using TextBlob.
-    """
     if "amazon" in store.lower() or "flipkart" in store.lower():
         base_reviews = ["Great product", "Fast delivery", "Genuine item", "Loved it", "Good packaging"]
     else:
         base_reviews = ["Okay product", "Late delivery", "Average quality", "Decent for the price"]
-
     variations = ["Worth the money", "Not bad", "Could be better", "Amazing performance", "Terrible support"]
-    
-    # Generate 5 random reviews
     product_reviews = random.sample(base_reviews + variations, 5)
-    
-    # RUN AI SENTIMENT ANALYSIS (TextBlob)
     total_polarity = 0
     for review in product_reviews:
         analysis = TextBlob(review)
         total_polarity += analysis.sentiment.polarity
-
-    # Calculate Score (0 to 100)
     avg_polarity = total_polarity / len(product_reviews)
     trust_score = int((avg_polarity + 1) * 50) 
-    
-    # Boost score slightly for trusted stores
     if "amazon" in store.lower() or "flipkart" in store.lower():
         trust_score += 10
-        
     return min(max(trust_score, 0), 100)
 
 # --- 4. ROUTES ---
 
-# --- AUTH ROUTES ---
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated: return redirect(url_for('index'))
     if request.method == "POST":
         action = request.form.get('action')
-        user_input = request.form.get('username') # Can be username OR email
+        user_input = request.form.get('username')
         password = request.form.get('password')
         
         if action == 'register':
@@ -128,7 +126,6 @@ def login():
                 flash('Account created! Please login.', 'success')
         
         elif action == 'login':
-            # Check if user_input matches either username OR email
             user = User.query.filter((User.username == user_input) | (User.email == user_input)).first()
             if user and check_password_hash(user.password, password):
                 login_user(user)
@@ -148,8 +145,6 @@ def reset_request():
     if request.method == 'POST':
         email = request.form.get('email')
         new_password = request.form.get('password')
-        
-        # If password is provided, perform update
         if new_password:
             user = User.query.filter_by(email=email).first()
             if user:
@@ -158,50 +153,33 @@ def reset_request():
                 db.session.commit()
                 flash('Success! Password has been changed.', 'success')
                 return redirect(url_for('login'))
-        
-        # If only email, check existence
         user = User.query.filter_by(email=email).first()
         if user:
             flash(f'Account found for {email}. Set new password below.', 'success')
             return render_template('reset_request.html', step='password', email=email)
         else:
-            flash('Email not found in our database.', 'error')
+            flash('Email not found.', 'error')
             return redirect(url_for('reset_request'))
-
     return render_template('reset_request.html', step='email')
 
-# --- MAIN ROUTES ---
 @app.route("/")
 @login_required
 def index():
-    # --- AI RECOMMENDATION ENGINE ---
     recommendations = []
-    
-    # 1. Get last search
     last_search = SearchHistory.query.filter_by(user_id=current_user.id).order_by(SearchHistory.timestamp.desc()).first()
-    
-    query = "futuristic gadgets" # Default if no history
-    if last_search:
-        query = last_search.search_query
+    query = "futuristic gadgets"
+    if last_search: query = last_search.search_query
 
-    # 2. Fetch recommendations
     try:
-        # Limit to 3 results for the home page
         params = {"engine": "google_shopping", "q": query, "hl": "en", "gl": "in", "api_key": SERP_API_KEY, "num": 3}
         data = requests.get("https://serpapi.com/search", params=params).json()
-        
         for item in data.get("shopping_results", [])[:3]:
             trust_score = get_ai_trust_score(item.get("title"), item.get("source", "Unknown"))
             recommendations.append({
-                "title": item.get("title"),
-                "price": item.get("price", "N/A"),
-                "image": item.get("thumbnail"),
-                "link": item.get("link"),
-                "score": trust_score
+                "title": item.get("title"), "price": item.get("price", "N/A"), "image": item.get("thumbnail"),
+                "link": item.get("link"), "score": trust_score
             })
-    except Exception as e:
-        print(f"Rec Error: {e}")
-
+    except: pass
     return render_template("index.html", user=current_user, recommendations=recommendations, rec_topic=query)
 
 @app.route("/account")
@@ -221,6 +199,7 @@ def update_profile():
     flash('Profile updated!', 'success')
     return redirect(url_for('account'))
 
+# --- WISHLIST ---
 @app.route("/wishlist")
 @login_required
 def wishlist():
@@ -236,9 +215,8 @@ def add_to_wishlist():
         flash('Item is already in your wishlist!', 'info')
     else:
         new_item = Wishlist(
-            user_id=current_user.id, title=request.form.get("title"), 
-            price=request.form.get("price"), link=link, 
-            image=request.form.get("image"), store=request.form.get("store")
+            user_id=current_user.id, title=request.form.get("title"), price=request.form.get("price"), 
+            link=link, image=request.form.get("image"), store=request.form.get("store")
         )
         db.session.add(new_item)
         db.session.commit()
@@ -255,15 +233,87 @@ def remove_wishlist(id):
         flash('Removed from Wishlist.', 'success')
     return redirect(url_for('wishlist'))
 
+# --- NEW: SHOPPING CART & INVOICE ---
+@app.route("/cart")
+@login_required
+def cart():
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+    total_price = sum(item.price_val for item in cart_items)
+    return render_template("cart.html", cart=cart_items, total=total_price, user=current_user)
+
+@app.route("/add_to_cart", methods=["POST"])
+@login_required
+def add_to_cart():
+    price_str = request.form.get("price")
+    price_val = extract_price(price_str)
+    
+    new_item = Cart(
+        user_id=current_user.id,
+        title=request.form.get("title"),
+        price=price_str,
+        price_val=price_val,
+        image=request.form.get("image"),
+        store=request.form.get("store")
+    )
+    db.session.add(new_item)
+    db.session.commit()
+    flash('Added to Cart!', 'success')
+    return redirect(request.referrer)
+
+@app.route("/remove_cart/<int:id>")
+@login_required
+def remove_cart(id):
+    item = Cart.query.get_or_404(id)
+    if item.user_id == current_user.id:
+        db.session.delete(item)
+        db.session.commit()
+        flash('Removed from Cart.', 'success')
+    return redirect(url_for('cart'))
+
+@app.route("/checkout")
+@login_required
+def checkout():
+    # 1. Get Cart Data
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+    if not cart_items:
+        flash("Your cart is empty!", "error")
+        return redirect(url_for('cart'))
+        
+    total_price = sum(item.price_val for item in cart_items)
+    date_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # 2. Render HTML for Invoice
+    rendered_html = render_template("invoice_pdf.html", 
+                                    user=current_user, 
+                                    items=cart_items, 
+                                    total=total_price, 
+                                    date=date_now)
+
+    # 3. Clear Cart (Simulate "Paid")
+    for item in cart_items:
+        db.session.delete(item)
+    db.session.commit()
+
+    # 4. Generate PDF using xhtml2pdf
+    pdf_buffer = io.BytesIO()
+    pisa_status = pisa.CreatePDF(io.BytesIO(rendered_html.encode("utf-8")), dest=pdf_buffer)
+
+    if pisa_status.err:
+        return "Error creating PDF", 500
+
+    pdf_buffer.seek(0)
+    
+    # 5. Download the PDF
+    return send_file(pdf_buffer, as_attachment=True, download_name=f"Invoice_{current_user.username}.pdf", mimetype='application/pdf')
+
+# --- SEARCH & COMPARE ---
 @app.route("/search", methods=["GET", "POST"])
 @login_required
 def search():
     product = request.args.get("q") or request.form.get("product")
     sort_order = request.args.get("sort")
-    
     if not product: return redirect(url_for('index'))
 
-    # Save to history if it's a new search
     if request.method == "POST" or (request.args.get("q") and not request.args.get("sort")):
         last = SearchHistory.query.filter_by(user_id=current_user.id).order_by(SearchHistory.timestamp.desc()).first()
         if not last or last.search_query != product:
@@ -277,18 +327,14 @@ def search():
         for item in data.get("shopping_results", []):
             link = item.get("link") or item.get("product_link")
             if link and link.startswith("/"): link = f"https://www.google.co.in{link}"
-            
             trust_score = get_ai_trust_score(item.get("title"), item.get("source", "Unknown"))
-            
             results.append({
                 "title": item.get("title"), "store": item.get("source", "Unknown"), 
                 "price": item.get("price", "N/A"), "price_value": extract_price(item.get("price", "0")), 
                 "link": link, "thumbnail": item.get("thumbnail"), "trust_score": trust_score 
             })
-        
         if sort_order == 'low': results.sort(key=lambda x: x["price_value"])
         elif sort_order == 'high': results.sort(key=lambda x: x["price_value"], reverse=True)
-            
         return render_template("results.html", product=product, results=results, sort_order=sort_order)
     except Exception as e:
         print(f"Search Error: {e}")
@@ -297,10 +343,8 @@ def search():
 @app.route("/compare", methods=["POST"])
 @login_required
 def compare():
-    p1_json = request.form.get("product1")
-    p2_json = request.form.get("product2")
-    p1 = json.loads(p1_json)
-    p2 = json.loads(p2_json)
+    p1 = json.loads(request.form.get("product1"))
+    p2 = json.loads(request.form.get("product2"))
     winner = None
     try:
         price1 = float(p1.get('price_value', 0))
@@ -311,45 +355,32 @@ def compare():
     except: pass
     return render_template("compare.html", p1=p1, p2=p2, winner=winner)
 
-# --- ADMIN ROUTE ---
 @app.route("/admin")
 @login_required
 def admin():
-    # Only allow pupuhari123
     if current_user.email != 'pupuhari123@gmail.com':
         flash("Access Denied: Admins only.", "error")
         return redirect(url_for('index'))
-
     total_users = User.query.count()
     total_searches = SearchHistory.query.count()
     total_wishlist = Wishlist.query.count()
-    
-    top_searches = db.session.query(
-        SearchHistory.search_query, 
-        func.count(SearchHistory.search_query).label('count')
-    ).group_by(SearchHistory.search_query).order_by(func.count(SearchHistory.search_query).desc()).limit(5).all()
-
+    top_searches = db.session.query(SearchHistory.search_query, func.count(SearchHistory.search_query).label('count')).group_by(SearchHistory.search_query).order_by(func.count(SearchHistory.search_query).desc()).limit(5).all()
     labels = [s[0] for s in top_searches]
     values = [s[1] for s in top_searches]
-
     return render_template("admin.html", total_users=total_users, total_searches=total_searches, total_wishlist=total_wishlist, labels=labels, values=values, user=current_user)
 
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message", "").lower()
-    if "hello" in user_message or "hi" in user_message:
-        response = "Hello! I am your Future Shop Assistant. Ask me to search for something!"
-    elif "help" in user_message:
-        response = "I can help you search. Try saying 'Search for iPhone' or 'Go to wishlist'."
+    if "hello" in user_message or "hi" in user_message: response = "Hello! I am your Future Shop Assistant."
+    elif "help" in user_message: response = "Try saying 'Search for iPhone' or 'Go to wishlist'."
     elif "search for" in user_message:
         query = user_message.replace("search for", "").strip()
         return jsonify({"response": f"Searching for {query}...", "redirect": url_for('search', q=query)})
-    elif "wishlist" in user_message:
-         return jsonify({"response": "Taking you to your wishlist...", "redirect": url_for('wishlist')})
-    elif "history" in user_message:
-         return jsonify({"response": "Opening your search history...", "redirect": url_for('account')})
-    else:
-        response = "I didn't quite catch that. Try saying 'Search for laptops'."
+    elif "wishlist" in user_message: return jsonify({"response": "Opening wishlist...", "redirect": url_for('wishlist')})
+    elif "cart" in user_message: return jsonify({"response": "Opening shopping cart...", "redirect": url_for('cart')})
+    elif "history" in user_message: return jsonify({"response": "Opening history...", "redirect": url_for('account')})
+    else: response = "I didn't quite catch that."
     return jsonify({"response": response})
 
 if __name__ == "__main__":
