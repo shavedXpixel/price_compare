@@ -9,6 +9,7 @@ from datetime import datetime
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from textblob import TextBlob
+from sqlalchemy import func  # Added for Admin Analytics
 import random
 
 app = Flask(__name__)
@@ -305,7 +306,7 @@ def search():
         print(f"Search Error: {e}")
         return render_template("index.html", error="Search failed")
 
-# --- COMPARISON ROUTE (NEW) ---
+# --- COMPARISON ROUTE ---
 @app.route("/compare", methods=["POST"])
 @login_required
 def compare():
@@ -328,9 +329,41 @@ def compare():
             elif price2 < price1:
                 winner = 'p2'
     except:
-        pass # If price conversion fails, no winner is highlighted
+        pass
         
     return render_template("compare.html", p1=p1, p2=p2, winner=winner)
+
+# --- ADMIN DASHBOARD ---
+@app.route("/admin")
+@login_required
+def admin():
+    # SECURITY: Only allow specific email
+    if current_user.email != 'pupuhari123@gmail.com':
+        flash("Access Denied: Admins only.", "error")
+        return redirect(url_for('index'))
+
+    # 1. Fetch Key Stats
+    total_users = User.query.count()
+    total_searches = SearchHistory.query.count()
+    total_wishlist = Wishlist.query.count()
+    
+    # 2. Fetch Top 5 Search Keywords
+    top_searches = db.session.query(
+        SearchHistory.search_query, 
+        func.count(SearchHistory.search_query).label('count')
+    ).group_by(SearchHistory.search_query).order_by(func.count(SearchHistory.search_query).desc()).limit(5).all()
+
+    # Prepare data for Chart.js
+    labels = [s[0] for s in top_searches]
+    values = [s[1] for s in top_searches]
+
+    return render_template("admin.html", 
+                           total_users=total_users, 
+                           total_searches=total_searches, 
+                           total_wishlist=total_wishlist, 
+                           labels=labels, 
+                           values=values,
+                           user=current_user)
 
 # --- CHATBOT ROUTE ---
 @app.route("/chat", methods=["POST"])

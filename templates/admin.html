@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body { 
+            min-height: 100vh; background: #1f242d; color: #fff; 
+            padding: 20px;
+        }
+
+        /* --- HEADER --- */
+        .admin-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 40px; background: rgba(31, 36, 45, 0.9);
+            border-bottom: 2px solid #0ef; border-radius: 15px;
+            margin-bottom: 30px; box-shadow: 0 0 20px rgba(0, 238, 255, 0.2);
+        }
+        .admin-header h1 { font-size: 1.8rem; }
+        .admin-header span { color: #0ef; text-shadow: 0 0 10px #0ef; }
+        
+        .back-btn {
+            text-decoration: none; color: #1f242d; background: #0ef;
+            padding: 10px 20px; border-radius: 8px; font-weight: bold;
+            transition: 0.3s;
+        }
+        .back-btn:hover { box-shadow: 0 0 15px #0ef; }
+
+        /* --- STATS CARDS --- */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px; margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #323946; padding: 25px; border-radius: 15px;
+            border: 1px solid rgba(0, 238, 255, 0.1); text-align: center;
+            transition: 0.3s; position: relative; overflow: hidden;
+        }
+        .stat-card:hover { transform: translateY(-5px); border-color: #0ef; box-shadow: 0 0 15px rgba(0, 238, 255, 0.3); }
+        
+        .stat-icon { font-size: 2.5rem; color: #0ef; margin-bottom: 10px; }
+        .stat-number { font-size: 2.5rem; font-weight: 700; }
+        .stat-label { color: #ccc; font-size: 1rem; }
+
+        /* --- ANALYTICS SECTION --- */
+        .analytics-container {
+            display: grid; grid-template-columns: 2fr 1fr; gap: 30px;
+        }
+
+        .chart-box {
+            background: #323946; padding: 30px; border-radius: 15px;
+            border: 1px solid rgba(0, 238, 255, 0.1);
+        }
+        .chart-box h3 { color: #0ef; margin-bottom: 20px; }
+
+        .keywords-list {
+            list-style: none;
+        }
+        .keyword-item {
+            display: flex; justify-content: space-between; padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+        .keyword-item:hover { background: rgba(0, 238, 255, 0.05); padding-left: 20px; }
+        .k-rank { color: #0ef; font-weight: bold; margin-right: 10px; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .analytics-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-header">
+        <h1>Admin <span>Dashboard</span></h1>
+        <a href="/" class="back-btn">Back to Home</a>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><ion-icon name="people"></ion-icon></div>
+            <div class="stat-number">{{ total_users }}</div>
+            <div class="stat-label">Registered Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><ion-icon name="search"></ion-icon></div>
+            <div class="stat-number">{{ total_searches }}</div>
+            <div class="stat-label">Total Searches</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><ion-icon name="heart"></ion-icon></div>
+            <div class="stat-number">{{ total_wishlist }}</div>
+            <div class="stat-label">Wishlist Items</div>
+        </div>
+    </div>
+
+    <div class="analytics-container">
+        <div class="chart-box">
+            <h3>Top Search Trends</h3>
+            <canvas id="searchChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h3>Top Keywords</h3>
+            <ul class="keywords-list">
+                {% for label in labels %}
+                <li class="keyword-item">
+                    <span><span class="k-rank">#{{ loop.index }}</span> {{ label }}</span>
+                    <small>High Volume</small>
+                </li>
+                {% else %}
+                <p style="color:#888;">No searches yet.</p>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // --- CHART.JS CONFIGURATION ---
+        const ctx = document.getElementById('searchChart').getContext('2d');
+        
+        // Data passed from Flask
+        const labels = {{ labels | tojson }};
+        const data = {{ values | tojson }};
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Search Volume',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(0, 238, 255, 0.6)',
+                        'rgba(255, 0, 255, 0.6)',
+                        'rgba(255, 255, 0, 0.6)',
+                        'rgba(0, 255, 100, 0.6)',
+                        'rgba(255, 100, 100, 0.6)'
+                    ],
+                    borderColor: '#0ef',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#ccc' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    x: {
+                        ticks: { color: '#ccc' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
