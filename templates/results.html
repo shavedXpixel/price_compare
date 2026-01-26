@@ -7,6 +7,8 @@
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -32,7 +34,7 @@
         .product-title { font-size: 0.95rem; margin-bottom: 5px; height: 42px; overflow: hidden; line-height: 1.4; }
         .price-tag { font-size: 1.4rem; color: #0ef; font-weight: 700; margin-bottom: 5px; }
 
-        /* --- NEW: HIGH VISIBILITY COMPARE LABEL --- */
+        /* COMPARE LABEL */
         .compare-label {
             position: absolute; top: 10px; left: 10px; z-index: 20;
             display: flex; align-items: center; gap: 8px;
@@ -41,14 +43,9 @@
             cursor: pointer; transition: 0.3s;
         }
         .compare-label:hover { background: rgba(0, 238, 255, 0.2); }
-        
-        .compare-select {
-            width: 18px; height: 18px; accent-color: #0ef; cursor: pointer;
-        }
+        .compare-select { width: 18px; height: 18px; accent-color: #0ef; cursor: pointer; }
         .compare-text { font-size: 0.8rem; font-weight: bold; color: #fff; pointer-events: none; }
 
-
-        /* COMPARE FLOATING BUTTON */
         .compare-float-btn {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             background: #0ef; color: #1f242d; padding: 15px 40px;
@@ -59,23 +56,48 @@
         }
         @keyframes popUp { from { bottom: -50px; opacity: 0; } to { bottom: 30px; opacity: 1; } }
 
-        /* AI SCORE STYLES */
+        /* AI SCORE */
         .ai-score-box { margin-bottom: 12px; text-align: left; }
         .ai-header { display: flex; justify-content: space-between; font-size: 0.8rem; color: #ccc; margin-bottom: 3px; }
         .ai-text { font-weight: bold; }
         .ai-bar-container { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
         .ai-bar { height: 100%; border-radius: 3px; width: 0%; transition: width 1s ease-in-out; }
 
+        /* BUTTONS */
+        .action-row { display: flex; gap: 8px; align-items: center; }
         .btn { flex: 1; padding: 10px; border-radius: 8px; font-weight: 600; text-decoration: none; cursor: pointer; border: 2px solid #0ef; display: flex; justify-content: center; align-items: center; }
         .view-btn { background: transparent; color: #fff; } .view-btn:hover { background: #0ef; color: #1f242d; }
         .graph-btn { background: rgba(0, 238, 255, 0.1); color: #0ef; }
         .wishlist-btn { width: 42px; padding: 0; background: transparent; color: #0ef; }
-        .action-row { display: flex; gap: 8px; align-items: center; }
+        
+        /* NEW: QR SHARE BUTTON */
+        .share-btn { width: 42px; padding: 0; background: transparent; color: #cc00ff; border-color: #cc00ff; }
+        .share-btn:hover { background: #cc00ff; color: #fff; box-shadow: 0 0 10px #cc00ff; }
+
         .chart-container { width: 100%; height: 250px; display: flex; align-items: center; justify-content: center; }
         .back-btn { width: 100%; background: #0ef; color: #1f242d; border: none; margin-top: 10px; }
         .footer-info { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(31, 36, 45, 0.95); padding: 10px; text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); z-index: 10; border-top: 1px solid #0ef; }
         .flash { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.8); color: #0f0; border: 1px solid #0f0; padding: 10px 20px; border-radius: 5px; z-index: 200; }
         .store-badge { position: absolute; top: 10px; right: 10px; background: #0ef; color: #1f242d; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 20px; z-index: 5; }
+
+        /* --- QR MODAL STYLES --- */
+        .modal {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background-color: #1f242d; border: 2px solid #0ef; border-radius: 15px; padding: 30px;
+            text-align: center; position: relative; width: 320px;
+            box-shadow: 0 0 30px rgba(0, 238, 255, 0.3);
+            animation: modalPop 0.3s ease-out;
+        }
+        @keyframes modalPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .close-qr { position: absolute; top: 10px; right: 15px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close-qr:hover { color: #0ef; }
+        
+        #qrcode { margin-top: 20px; display: flex; justify-content: center; background: white; padding: 10px; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -102,13 +124,8 @@
                         
                         <div class="compare-label" onclick="toggleCheckbox('check-{{ loop.index }}')">
                             <input type="checkbox" id="check-{{ loop.index }}" class="compare-select" 
-                                data-title="{{ item.title }}" 
-                                data-price="{{ item.price }}"
-                                data-priceval="{{ item.price_value }}"
-                                data-image="{{ item.thumbnail }}"
-                                data-store="{{ item.store }}"
-                                data-score="{{ item.trust_score }}"
-                                data-link="{{ item.link }}"
+                                data-title="{{ item.title }}" data-price="{{ item.price }}" data-priceval="{{ item.price_value }}"
+                                data-image="{{ item.thumbnail }}" data-store="{{ item.store }}" data-score="{{ item.trust_score }}" data-link="{{ item.link }}"
                                 onclick="event.stopPropagation(); handleSelection(this)">
                             <span class="compare-text">Compare</span>
                         </div>
@@ -128,6 +145,11 @@
                         <div class="action-row">
                             <a href="{{ item.link }}" target="_blank" class="btn view-btn">Buy</a>
                             <button type="button" class="btn graph-btn" onclick="showGraph('{{ loop.index }}', '{{ item.price_value }}')"><ion-icon name="stats-chart" style="font-size: 1.2rem;"></ion-icon></button>
+                            
+                            <button type="button" class="btn share-btn" onclick="openQR('{{ item.link }}')">
+                                <ion-icon name="qr-code-outline" style="font-size: 1.2rem;"></ion-icon>
+                            </button>
+
                             <form action="/add_to_wishlist" method="POST" style="margin: 0;">
                                 <input type="hidden" name="title" value="{{ item.title }}"><input type="hidden" name="price" value="{{ item.price }}"><input type="hidden" name="link" value="{{ item.link }}"><input type="hidden" name="image" value="{{ item.thumbnail }}"><input type="hidden" name="store" value="{{ item.store }}">
                                 <button type="submit" class="btn wishlist-btn"><ion-icon name="heart" style="font-size: 1.5rem;"></ion-icon></button>
@@ -147,6 +169,15 @@
         {% endif %}
     </div>
 
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <span class="close-qr" onclick="closeQR()">&times;</span>
+            <h3 style="color:#0ef; margin-bottom:10px;">Scan to Buy</h3>
+            <p style="font-size:0.8rem; color:#ccc;">Open camera on mobile</p>
+            <div id="qrcode"></div>
+        </div>
+    </div>
+
     <form id="compareForm" action="/compare" method="POST" style="display:none;">
         <input type="hidden" name="product1" id="p1_input">
         <input type="hidden" name="product2" id="p2_input">
@@ -163,6 +194,32 @@
         for (let i = 0; i < 80; i++) particles.push(new Particle());
         function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
         
+        // --- QR CODE LOGIC ---
+        function openQR(link) {
+            const modal = document.getElementById('qrModal');
+            const container = document.getElementById('qrcode');
+            container.innerHTML = ""; // Clear previous QR
+            
+            // Generate New QR
+            new QRCode(container, {
+                text: link,
+                width: 200,
+                height: 200,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            
+            modal.style.display = "flex";
+        }
+        function closeQR() { document.getElementById('qrModal').style.display = "none"; }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('qrModal');
+            if (event.target == modal) { modal.style.display = "none"; }
+        }
+
         // --- AI SCORE COLOR LOGIC ---
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('.ai-score-box').forEach(box => {
@@ -179,14 +236,7 @@
 
         // --- COMPARISON LOGIC ---
         let selectedProducts = [];
-        
-        // Helper to click checkbox when clicking label
-        function toggleCheckbox(id) {
-            const checkbox = document.getElementById(id);
-            checkbox.checked = !checkbox.checked;
-            handleSelection(checkbox);
-        }
-
+        function toggleCheckbox(id) { const checkbox = document.getElementById(id); checkbox.checked = !checkbox.checked; handleSelection(checkbox); }
         function handleSelection(checkbox) {
             const data = {
                 title: checkbox.dataset.title, price: checkbox.dataset.price, price_value: checkbox.dataset.priceval,
