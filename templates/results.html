@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results - Clay</title>
+    <title>Results - Cyber Clay</title>
     
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,126 +13,148 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
+        /* --- DARK THEME VARIABLES --- */
+        :root {
+            --bg-color: #1f242d;
+            --surface-color: #262c36;
+            --shadow-light: rgba(255, 255, 255, 0.05);
+            --shadow-dark: rgba(0, 0, 0, 0.6);
+            --neon: #0ef;
+            --text-main: #fff;
+            --text-sec: #ccc;
+        }
+
         body { 
-            background: #eef2f5; color: #333; padding-bottom: 80px; 
-            min-height: 100vh;
+            background: var(--bg-color); color: var(--text-main); 
+            padding-bottom: 80px; min-height: 100vh;
         }
 
         /* --- HEADER --- */
         .header { 
             padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; 
-            background: #eef2f5; position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 10px 20px rgba(209, 217, 230, 0.5);
+            background: var(--bg-color); position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border-bottom: 1px solid rgba(0, 238, 255, 0.1);
         }
-        .header h1 { font-size: 1.5rem; color: #555; }
-        .header h1 span { color: #0ef; text-shadow: 1px 1px 2px #fff; }
+        .header h1 { font-size: 1.5rem; color: var(--text-sec); }
+        .header h1 span { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
 
         .controls { display: flex; gap: 15px; align-items: center; }
 
+        /* DARK CLAY BUTTONS */
         .clay-btn {
-            padding: 10px 20px; border-radius: 15px; background: #eef2f5; border: none; 
-            font-weight: 600; color: #555; text-decoration: none; cursor: pointer;
-            box-shadow: 6px 6px 12px #d1d9e6, -6px -6px 12px #ffffff;
+            padding: 10px 20px; border-radius: 15px; 
+            background: var(--surface-color); border: none; 
+            font-weight: 600; color: var(--text-sec); text-decoration: none; cursor: pointer;
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
             transition: 0.2s; display: flex; align-items: center; gap: 5px;
         }
-        .clay-btn:hover { color: #0ef; transform: translateY(-2px); }
-        .clay-btn:active { box-shadow: inset 6px 6px 12px #d1d9e6, inset -6px -6px 12px #ffffff; }
+        .clay-btn:hover { color: var(--neon); transform: translateY(-2px); box-shadow: 0 0 15px rgba(0, 238, 255, 0.2); }
+        .clay-btn:active { box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light); }
 
         .clay-select {
             padding: 10px; border-radius: 15px; border: none; outline: none;
-            background: #eef2f5; color: #555; font-weight: 600; cursor: pointer;
-            box-shadow: inset 5px 5px 10px #d1d9e6, inset -5px -5px 10px #ffffff;
+            background: var(--surface-color); color: var(--neon); font-weight: 600; cursor: pointer;
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
         }
 
         /* --- GRID & CARD --- */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 40px; padding: 40px 50px; }
 
         .card-perspective { perspective: 1000px; height: 520px; }
-        
         .card-inner { 
             position: relative; width: 100%; height: 100%; text-align: center; 
             transition: transform 0.8s; transform-style: preserve-3d; 
         }
-        
         .card-inner.flipped { transform: rotateY(180deg); }
-
-        /* --- IMPORTANT FIX: POINTER EVENTS --- */
-        /* By default, back is not clickable */
-        .card-back { pointer-events: none; }
-        .card-front { pointer-events: auto; }
-
-        /* When flipped, Front is not clickable, Back IS clickable */
-        .card-inner.flipped .card-front { pointer-events: none; }
-        .card-inner.flipped .card-back { pointer-events: auto; }
 
         .card-front, .card-back { 
             position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
-            background: #eef2f5; border-radius: 30px; padding: 25px;
-            box-shadow: 10px 10px 20px #d1d9e6, -10px -10px 20px #ffffff;
+            background: var(--surface-color); border-radius: 30px; padding: 25px;
+            /* DARK CLAY SHADOWS */
+            box-shadow: 15px 15px 30px rgba(0,0,0,0.5), -15px -15px 30px rgba(255,255,255,0.05);
             display: flex; flex-direction: column; justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        
         .card-back { transform: rotateY(180deg); }
+
+        /* POINTER EVENTS FIX */
+        .card-back { pointer-events: none; }
+        .card-front { pointer-events: auto; }
+        .card-inner.flipped .card-front { pointer-events: none; }
+        .card-inner.flipped .card-back { pointer-events: auto; }
 
         .top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; position: relative; z-index: 10; }
         
         .compare-wrap { position: relative; cursor: pointer; z-index: 20; }
-        .compare-check { appearance: none; width: 25px; height: 25px; border-radius: 50%; background: #eef2f5; box-shadow: 5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff; cursor: pointer; display: grid; place-items: center; }
-        .compare-check::after { content: ''; width: 12px; height: 12px; background: #0ef; border-radius: 50%; opacity: 0; transition: 0.2s; }
-        .compare-check:checked { box-shadow: inset 5px 5px 10px #d1d9e6, inset -5px -5px 10px #ffffff; }
+        .compare-check { 
+            appearance: none; width: 25px; height: 25px; border-radius: 50%; 
+            background: var(--surface-color); 
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); 
+            cursor: pointer; display: grid; place-items: center; 
+        }
+        .compare-check::after { content: ''; width: 12px; height: 12px; background: var(--neon); border-radius: 50%; opacity: 0; transition: 0.2s; box-shadow: 0 0 10px var(--neon); }
+        .compare-check:checked { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
         .compare-check:checked::after { opacity: 1; }
         
-        .store-badge { font-size: 0.75rem; font-weight: bold; color: #888; background: #eef2f5; padding: 5px 10px; border-radius: 10px; box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff; }
+        .store-badge { 
+            font-size: 0.75rem; font-weight: bold; color: var(--neon); 
+            background: var(--surface-color); padding: 5px 10px; border-radius: 10px; 
+            box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); 
+        }
 
         .product-link { text-decoration: none; color: inherit; display: block; flex-grow: 1; display: flex; flex-direction: column; }
 
+        /* DARK PRESSED IMAGE BOX */
         .img-box {
-            width: 100%; height: 160px; border-radius: 20px; background: #eef2f5;
-            box-shadow: inset 6px 6px 12px #d1d9e6, inset -6px -6px 12px #ffffff;
+            width: 100%; height: 160px; border-radius: 20px; background: var(--surface-color);
+            box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
             display: flex; justify-content: center; align-items: center; margin-bottom: 15px; padding: 15px;
             transition: 0.3s;
         }
-        .product-link:hover .img-box { transform: scale(1.02); }
-        .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+        .product-link:hover .img-box { transform: scale(1.02); box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light); }
+        .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5)); }
 
-        .title { font-size: 1rem; color: #333; height: 45px; overflow: hidden; margin-bottom: 5px; font-weight: 600; }
-        .price { font-size: 1.4rem; color: #0ef; font-weight: bold; margin-bottom: 10px; text-shadow: 1px 1px 0 #fff; }
+        .title { font-size: 1rem; color: #fff; height: 45px; overflow: hidden; margin-bottom: 5px; font-weight: 500; }
+        .price { font-size: 1.4rem; color: var(--neon); font-weight: bold; margin-bottom: 10px; text-shadow: 0 0 10px rgba(0, 238, 255, 0.4); }
 
         .ai-box { text-align: left; margin-bottom: 15px; }
-        .ai-label { font-size: 0.8rem; color: #888; display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .bar-bg { width: 100%; height: 8px; background: #eef2f5; border-radius: 5px; box-shadow: inset 2px 2px 5px #d1d9e6, inset -2px -2px 5px #ffffff; overflow: hidden; }
-        .bar-fill { height: 100%; border-radius: 5px; width: 0%; transition: 1s; }
+        .ai-label { font-size: 0.8rem; color: #aaa; display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .bar-bg { width: 100%; height: 8px; background: var(--surface-color); border-radius: 5px; box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light); overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 5px; width: 0%; transition: 1s; box-shadow: 0 0 10px currentColor; }
 
+        /* ACTIONS */
         .actions { display: flex; gap: 10px; position: relative; z-index: 10; }
         .icon-btn {
             width: 45px; height: 45px; border-radius: 50%; border: none; cursor: pointer;
-            background: #eef2f5; color: #666; display: flex; justify-content: center; align-items: center; font-size: 1.2rem;
-            box-shadow: 6px 6px 12px #d1d9e6, -6px -6px 12px #ffffff; transition: 0.2s;
+            background: var(--surface-color); color: #888; display: flex; justify-content: center; align-items: center; font-size: 1.2rem;
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); transition: 0.2s;
         }
-        .icon-btn:hover { color: #0ef; transform: translateY(-2px); }
+        .icon-btn:hover { color: var(--neon); transform: translateY(-2px); text-shadow: 0 0 5px var(--neon); }
 
         .add-cart {
-            flex: 1; border-radius: 15px; border: none; background: #eef2f5; color: #555; font-weight: bold; cursor: pointer;
-            box-shadow: 6px 6px 12px #d1d9e6, -6px -6px 12px #ffffff; transition: 0.2s;
+            flex: 1; border-radius: 15px; border: none; background: var(--surface-color); 
+            color: var(--neon); font-weight: bold; cursor: pointer;
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); transition: 0.2s;
         }
-        .add-cart:hover { color: #0ef; }
+        .add-cart:hover { background: var(--neon); color: #1f242d; box-shadow: 0 0 15px var(--neon); }
 
         .graph-container {
-            width: 100%; height: 250px; border-radius: 20px; background: #eef2f5;
-            box-shadow: inset 6px 6px 12px #d1d9e6, inset -6px -6px 12px #ffffff;
+            width: 100%; height: 250px; border-radius: 20px; background: var(--surface-color);
+            box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
             padding: 10px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px;
         }
         
         .compare-float {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: #0ef; color: #fff; padding: 15px 40px; border-radius: 30px;
-            font-weight: bold; box-shadow: 5px 5px 15px #a3e4ea, -5px -5px 15px #ffffff;
+            background: var(--neon); color: #1f242d; padding: 15px 40px; border-radius: 30px;
+            font-weight: bold; box-shadow: 0 0 20px var(--neon);
             border: none; cursor: pointer; display: none; z-index: 1000;
         }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: #eef2f5; padding: 30px; border-radius: 30px; text-align: center; box-shadow: 10px 10px 30px rgba(0,0,0,0.2); width: 300px; }
-        #qrcode { background: #fff; padding: 10px; border-radius: 10px; margin-top: 20px; display: inline-block; box-shadow: inset 5px 5px 10px #ddd; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: var(--surface-color); padding: 30px; border-radius: 30px; text-align: center; box-shadow: 0 0 30px var(--neon); width: 300px; border: 1px solid var(--neon); }
+        #qrcode { background: #fff; padding: 10px; border-radius: 10px; margin-top: 20px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -211,7 +233,7 @@
                     </div>
 
                     <div class="card-back">
-                        <h3 style="color:#555; text-align:center;">Price History (7 Days)</h3>
+                        <h3 style="color:#aaa; text-align:center;">Price History (7 Days)</h3>
                         <div class="graph-container">
                             <canvas id="chart-{{ loop.index }}"></canvas>
                         </div>
@@ -226,14 +248,14 @@
             {% endfor %}
         {% else %}
             <div style="grid-column:1/-1; text-align:center; padding:50px;">
-                <h2>No results found.</h2>
+                <h2 style="color:#666;">No results found.</h2>
             </div>
         {% endif %}
     </div>
 
     <div id="qrModal" class="modal" onclick="if(event.target==this) closeQR()">
         <div class="modal-content">
-            <h3 style="color:#0ef;">Scan to Buy</h3>
+            <h3 style="color:#0ef; margin-bottom:15px;">Scan to Buy</h3>
             <div id="qrcode"></div>
             <button class="clay-btn" style="margin-top:20px; width:100%; justify-content:center;" onclick="closeQR()">Close</button>
         </div>
@@ -268,7 +290,6 @@
         }
         function closeQR() { document.getElementById('qrModal').style.display = "none"; }
 
-        // --- GRAPH LOGIC ---
         let chartInstances = {};
         
         function showGraph(index, currentPrice) {
@@ -305,13 +326,12 @@
                     plugins: { legend: { display: false } }, 
                     scales: { 
                         x: { display: true, ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } }, 
-                        y: { display: true, ticks: { color: '#0ef', font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.05)' } } 
+                        y: { display: true, ticks: { color: '#0ef', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } 
                     } 
                 } 
             });
         }
 
-        // --- FIXED FLIP BACK FUNCTION ---
         function hideGraph(index) {
             const card = document.getElementById(`card-${index}`);
             if (card) {
