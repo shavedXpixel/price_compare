@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparison Battle</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body { 
+            min-height: 100vh; background: #1f242d; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 40px 20px;
+        }
+
+        h1 { margin-bottom: 40px; text-align: center; color: #0ef; text-shadow: 0 0 10px #0ef; }
+
+        .battle-arena {
+            display: flex; gap: 50px; justify-content: center; align-items: stretch;
+            width: 100%; max-width: 1000px; position: relative;
+        }
+
+        /* VS Badge in the middle */
+        .vs-badge {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #ff3333; color: white; font-weight: 900; font-size: 2rem;
+            width: 80px; height: 80px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            border: 4px solid #1f242d; box-shadow: 0 0 20px rgba(255, 51, 51, 0.8);
+            z-index: 10;
+        }
+
+        .product-col {
+            flex: 1; background: #323946; border-radius: 20px; padding: 30px;
+            border: 2px solid rgba(0, 238, 255, 0.1);
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            transition: 0.3s; position: relative;
+        }
+
+        /* Winner Glow Effect */
+        .winner {
+            border-color: #0f0;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            transform: scale(1.05); z-index: 5;
+        }
+        .winner::after {
+            content: "🏆 BEST VALUE"; position: absolute; top: -15px;
+            background: #0f0; color: #000; font-weight: bold; padding: 5px 15px;
+            border-radius: 20px; font-size: 0.8rem;
+        }
+
+        .img-box {
+            width: 200px; height: 200px; background: #fff; border-radius: 15px;
+            display: flex; justify-content: center; align-items: center; margin-bottom: 20px;
+        }
+        .img-box img { max-width: 90%; max-height: 90%; object-fit: contain; }
+
+        .title { font-size: 1.2rem; margin-bottom: 15px; height: 60px; overflow: hidden; }
+        .price { font-size: 2rem; font-weight: 700; color: #0ef; margin-bottom: 20px; }
+        
+        .stat-row {
+            width: 100%; display: flex; justify-content: space-between;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat-label { color: #ccc; }
+        .stat-val { font-weight: 600; }
+
+        .buy-btn {
+            margin-top: 30px; width: 100%; padding: 15px;
+            background: #0ef; color: #1f242d; text-decoration: none;
+            font-weight: bold; border-radius: 10px; transition: 0.3s;
+        }
+        .buy-btn:hover { box-shadow: 0 0 20px #0ef; }
+
+        .back-link { margin-top: 40px; color: #ccc; text-decoration: none; border-bottom: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+
+    <h1>Product Showdown</h1>
+
+    <div class="battle-arena">
+        <div class="vs-badge">VS</div>
+
+        <div class="product-col {% if winner == 'p1' %}winner{% endif %}">
+            <div class="img-box"><img src="{{ p1.image }}"></div>
+            <div class="title">{{ p1.title }}</div>
+            <div class="price">{{ p1.price }}</div>
+            
+            <div class="stat-row">
+                <span class="stat-label">Store</span>
+                <span class="stat-val">{{ p1.store }}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">AI Trust Score</span>
+                <span class="stat-val" style="color: {% if p1.score|int > 80 %}#0f0{% else %}#ffaa00{% endif %}">{{ p1.score }}%</span>
+            </div>
+            
+            <a href="{{ p1.link }}" target="_blank" class="buy-btn">Buy This One</a>
+        </div>
+
+        <div class="product-col {% if winner == 'p2' %}winner{% endif %}">
+            <div class="img-box"><img src="{{ p2.image }}"></div>
+            <div class="title">{{ p2.title }}</div>
+            <div class="price">{{ p2.price }}</div>
+            
+            <div class="stat-row">
+                <span class="stat-label">Store</span>
+                <span class="stat-val">{{ p2.store }}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">AI Trust Score</span>
+                <span class="stat-val" style="color: {% if p2.score|int > 80 %}#0f0{% else %}#ffaa00{% endif %}">{{ p2.score }}%</span>
+            </div>
+            
+            <a href="{{ p2.link }}" target="_blank" class="buy-btn">Buy This One</a>
+        </div>
+    </div>
+
+    <a href="javascript:history.back()" class="back-link">Back to Results</a>
+
+</body>
+</html>
