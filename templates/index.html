@@ -19,6 +19,7 @@
         
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
         
+        /* Main Card */
         .wrapper { 
             width: 90%; max-width: 500px; 
             background: rgba(31, 36, 45, 0.75); 
@@ -29,51 +30,77 @@
         }
         
         .input-box { position: relative; width: 100%; margin-bottom: 25px; }
-        
-        .input-box input { 
-            width: 100%; padding: 15px 50px 15px 50px; /* Added padding on right for mic */
-            background: rgba(255, 255, 255, 0.05); 
-            border: 2px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 10px; color: white; outline: none; transition: 0.3s; 
-        }
-        
+        .input-box input { width: 100%; padding: 15px 50px 15px 50px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: white; outline: none; transition: 0.3s; }
         .input-box input:focus { border-color: #0ef; box-shadow: 0 0 10px rgba(0, 238, 255, 0.2); }
-        
-        .input-box .icon { 
-            position: absolute; left: 15px; top: 50%; transform: translateY(-50%); 
-            font-size: 1.2rem; color: #ccc; 
-        }
-        
-        /* NEW: Microphone Icon Style */
-        .input-box .mic-icon { 
-            position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
-            font-size: 1.5rem; color: #ccc; cursor: pointer; transition: 0.3s;
-        }
+        .input-box .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: #ccc; }
+        .input-box .mic-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; color: #ccc; cursor: pointer; transition: 0.3s; }
         .input-box .mic-icon:hover { color: #0ef; }
-        
-        /* Microphone Animation when Listening */
-        @keyframes pulse-red {
-            0% { text-shadow: 0 0 0 rgba(255, 0, 0, 0.7); color: #ff3333; transform: translateY(-50%) scale(1); }
-            50% { text-shadow: 0 0 15px rgba(255, 0, 0, 0.9); color: #ff0000; transform: translateY(-50%) scale(1.2); }
-            100% { text-shadow: 0 0 0 rgba(255, 0, 0, 0.7); color: #ff3333; transform: translateY(-50%) scale(1); }
-        }
+        @keyframes pulse-red { 0% { color: #ff3333; transform: translateY(-50%) scale(1); } 50% { color: #ff0000; transform: translateY(-50%) scale(1.2); } 100% { color: #ff3333; transform: translateY(-50%) scale(1); } }
         .listening { animation: pulse-red 1.5s infinite; }
 
         .btn-group { display: flex; gap: 15px; }
         button { padding: 12px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; flex: 1; }
-        
         .search-btn { background: #0ef; color: #1f242d; box-shadow: 0 0 10px #0ef; }
         .search-btn:hover { transform: scale(1.05); }
-        
         .history-btn { background: transparent; color: #fff; border: 2px solid #fff; }
         .history-btn:hover { border-color: #0ef; color: #0ef; }
-        
         .wishlist-btn { background: transparent; color: #0ef; border: 2px solid #0ef; }
         .wishlist-btn:hover { background: #0ef; color: #1f242d; }
         
         .footer-info { position: fixed; bottom: 10px; text-align: center; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); width: 100%; }
         .nav-bar { position: absolute; top: 20px; right: 30px; }
         .logout-btn { text-decoration: none; color: #fff; font-weight: 600; padding: 10px 20px; border: 2px solid #0ef; border-radius: 8px; }
+
+        /* --- CHATBOT STYLES --- */
+        .chat-btn {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 60px; height: 60px;
+            background: #0ef; color: #1f242d;
+            border-radius: 50%; border: none;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2rem; cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.5);
+            transition: 0.3s; z-index: 1000;
+        }
+        .chat-btn:hover { transform: scale(1.1); }
+
+        .chat-window {
+            position: fixed; bottom: 100px; right: 30px;
+            width: 350px; height: 450px;
+            background: rgba(31, 36, 45, 0.95);
+            border: 2px solid #0ef; border-radius: 20px;
+            display: none; flex-direction: column;
+            overflow: hidden; backdrop-filter: blur(10px);
+            z-index: 1000; box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        .chat-header {
+            background: #0ef; color: #1f242d;
+            padding: 15px; font-weight: bold;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-body {
+            flex: 1; padding: 15px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .chat-message {
+            max-width: 80%; padding: 10px; border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        .bot-msg { background: rgba(0, 238, 255, 0.2); align-self: flex-start; border-bottom-left-radius: 0; }
+        .user-msg { background: #0ef; color: #1f242d; align-self: flex-end; border-bottom-right-radius: 0; }
+        
+        .chat-input-area {
+            padding: 10px; border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; gap: 10px;
+        }
+        .chat-input {
+            flex: 1; padding: 10px; border-radius: 20px; border: none; outline: none;
+            background: rgba(255,255,255,0.1); color: white;
+        }
+        .send-btn {
+            background: transparent; border: none; color: #0ef;
+            font-size: 1.5rem; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -88,9 +115,7 @@
             <div class="input-box">
                 <span class="icon"><ion-icon name="search"></ion-icon></span>
                 <input type="text" id="searchInput" name="q" placeholder="Enter product name..." required autocomplete="off">
-                <span class="mic-icon" onclick="startVoiceSearch()">
-                    <ion-icon name="mic"></ion-icon>
-                </span>
+                <span class="mic-icon" onclick="startVoiceSearch()"><ion-icon name="mic"></ion-icon></span>
             </div>
             
             <div class="btn-group">
@@ -102,10 +127,26 @@
         <p id="voiceStatus" style="font-size: 0.8rem; color: #888; margin-top: 10px; min-height: 20px;"></p>
     </div>
 
+    <button class="chat-btn" onclick="toggleChat()"><ion-icon name="chatbubbles"></ion-icon></button>
+    
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <span>AI Assistant</span>
+            <ion-icon name="close" onclick="toggleChat()" style="cursor: pointer; font-size: 1.5rem;"></ion-icon>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-message bot-msg">Hello! Ask me to "Search for phones" or "Go to wishlist".</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
+            <button class="send-btn" onclick="sendMessage()"><ion-icon name="send"></ion-icon></button>
+        </div>
+    </div>
+
     <div class="footer-info">Made with ❤️ by <strong>Priyansu</strong> | pupuhari123@gmail.com</div>
 
     <script>
-        // --- 1. GEOMETRIC BACKGROUND ---
+        // --- ANIMATION & VOICE SEARCH (Keep Existing) ---
         const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
         let particles = []; function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize); resize();
@@ -114,54 +155,58 @@
         function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
         gsap.from(".wrapper", { duration: 1.2, y: 50, opacity: 0, ease: "power3.out" });
 
-        // --- 2. VOICE SEARCH LOGIC ---
         function startVoiceSearch() {
-            const micIcon = document.querySelector('.mic-icon');
-            const statusText = document.getElementById('voiceStatus');
-            const searchInput = document.getElementById('searchInput');
-            const form = document.getElementById('searchForm');
-
-            // Check if browser supports speech recognition
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                const recognition = new SpeechRecognition();
-                
-                recognition.lang = 'en-US'; // Set language
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.onstart = () => { document.querySelector('.mic-icon').classList.add('listening'); document.getElementById('voiceStatus').innerText = "Listening..."; };
+                recognition.onresult = (e) => { 
+                    document.getElementById('searchInput').value = e.results[0][0].transcript; 
+                    document.getElementById('searchForm').submit(); 
+                };
+                recognition.onend = () => { document.querySelector('.mic-icon').classList.remove('listening'); document.getElementById('voiceStatus').innerText = ""; };
                 recognition.start();
+            } else { alert("Voice search not supported in this browser."); }
+        }
 
-                // UI Updates
-                micIcon.classList.add('listening');
-                statusText.innerText = "Listening... Speak now";
-                statusText.style.color = "#0ef";
+        // --- CHATBOT LOGIC ---
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.style.display = chatWindow.style.display === 'flex' ? 'none' : 'flex';
+        }
 
-                recognition.onresult = (event) => {
-                    const speechResult = event.results[0][0].transcript;
-                    searchInput.value = speechResult;
-                    statusText.innerText = "Searching for: " + speechResult;
-                    
-                    // Auto submit after a short delay
-                    setTimeout(() => {
-                        form.submit();
-                    }, 500);
-                };
+        function handleEnter(e) { if(e.key === 'Enter') sendMessage(); }
 
-                recognition.onspeechend = () => {
-                    recognition.stop();
-                    micIcon.classList.remove('listening');
-                    statusText.innerText = "Processing...";
-                };
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
 
-                recognition.onerror = (event) => {
-                    micIcon.classList.remove('listening');
-                    statusText.innerText = "Error: " + event.error;
-                    statusText.style.color = "#ff3333";
-                };
-            } else {
-                alert("Sorry, your browser does not support Voice Search. Try using Google Chrome.");
-            }
+            // Add User Message
+            addMessage(message, 'user-msg');
+            input.value = '';
+
+            // Send to Backend
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessage(data.response, 'bot-msg');
+                if (data.redirect) {
+                    setTimeout(() => window.location.href = data.redirect, 1500);
+                }
+            });
+        }
+
+        function addMessage(text, className) {
+            const chatBody = document.getElementById('chatBody');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-message ${className}`;
+            msgDiv.innerText = text;
+            chatBody.appendChild(msgDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
         }
     </script>
 </body>
