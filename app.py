@@ -122,7 +122,7 @@ def login():
                 flash('Account created! Please login.', 'success')
         
         elif action == 'login':
-            user = User.query.filter_by(username=username).first()
+            user = User.query.filter((User.username == username) | (User.email == username)).first()
             if user and check_password_hash(user.password, password):
                 login_user(user)
                 return redirect(url_for('index'))
