@@ -38,6 +38,7 @@
             font-weight: 600; color: var(--text-sec); text-decoration: none; cursor: pointer;
             box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
             transition: 0.2s;
+            display: flex; align-items: center; gap: 8px; /* Added Flex for Icons */
         }
         .clay-btn-sm:hover { color: var(--neon); transform: translateY(-2px); box-shadow: 0 0 15px rgba(0, 238, 255, 0.2); }
         .clay-btn-sm:active { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
@@ -51,7 +52,7 @@
 
         /* MAIN SEARCH WRAPPER */
         .wrapper { 
-            width: 90%; max-width: 600px; margin-top: 100px; text-align: center; /* Increased top margin for balance */
+            width: 90%; max-width: 600px; margin-top: 100px; text-align: center;
             background: var(--surface-color); border-radius: 40px;
             box-shadow: 15px 15px 30px rgba(0,0,0,0.5), -10px -10px 30px rgba(255,255,255,0.05);
             padding: 50px; position: relative; z-index: 10;
@@ -166,16 +167,12 @@
         .send-icon { font-size: 1.5rem; color: var(--neon); cursor: pointer; align-self: center; transition: 0.2s; }
         .send-icon:hover { transform: scale(1.2); text-shadow: 0 0 10px var(--neon); }
         
-        /* FOOTER FIXED: No longer overlaps */
+        /* FOOTER */
         .footer-info { 
-            margin-top: 50px; 
-            margin-bottom: 20px;
-            text-align: center; 
-            font-size: 0.8rem; 
-            color: rgba(255, 255, 255, 0.4); 
-            width: 100%; 
-            position: relative; /* Changed from fixed */
-            z-index: 10;
+            margin-top: 50px; margin-bottom: 20px;
+            text-align: center; font-size: 0.8rem; 
+            color: rgba(255, 255, 255, 0.4); width: 100%; 
+            position: relative; z-index: 10;
         }
 
         /* FLASH MESSAGES */
@@ -198,6 +195,10 @@
             <option value="hi" {% if lang == 'hi' %}selected{% endif %}>Hindi</option>
             <option value="od" {% if lang == 'od' %}selected{% endif %}>Odia</option>
         </select>
+
+        <a href="/cart" class="clay-btn-sm" title="Go to Cart">
+            <ion-icon name="cart" style="font-size:1.2rem;"></ion-icon> Cart
+        </a>
 
         {% if user.email == 'pupuhari123@gmail.com' %}
             <a href="/admin" class="clay-btn-sm">{{ t['admin_btn'] }}</a>
