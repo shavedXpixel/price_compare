@@ -28,9 +28,9 @@ cloudinary.config(
   api_secret = "YOUR_API_SECRET" 
 )
 
-# --- DATABASE CONFIG (COCKROACHDB) ---
-# Paste your CockroachDB URL below (or set it in Render Env Vars)
-# It usually ends with '?sslmode=verify-full'
+# --- DATABASE CONFIG (COCKROACHDB FIX) ---
+# We added '&sslrootcert=system' to fix the Render certificate error.
+# Replace the USERNAME, PASSWORD, and CLUSTER address with your real ones.
 COCKROACH_DB_URL = "postgresql://priyansu:Y0fHHK30_PACWW-77M0ilw@bald-owlet-21046.j77.aws-ap-south-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full&sslrootcert=system"
 
 database_url = os.environ.get('DATABASE_URL', COCKROACH_DB_URL)
@@ -102,13 +102,12 @@ class Cart(db.Model):
     image = db.Column(db.String(500))
     store = db.Column(db.String(100))
 
-# --- TABLE CREATION (Attempt to run on start) ---
+# --- TABLE CREATION ---
 with app.app_context():
     try:
         db.create_all()
-        print("Database connected and tables created!")
     except Exception as e:
-        print(f"DB Connection Warning: {e}")
+        print(f"DB Warning: {e}")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -142,7 +141,7 @@ def get_ai_trust_score(product_title, store):
 # --- 5. ROUTES ---
 
 # --- THE "FIX" ROUTE ---
-# VISIT THIS LINK ONCE TO FIX "INTERNAL SERVER ERROR"
+# Visit /init_db once after deploying to create tables
 @app.route('/init_db')
 def init_db():
     try:
@@ -161,7 +160,6 @@ def login():
         
         if action == 'register':
             email = request.form.get('email')
-            # Check if user exists (Handling DB errors if table doesn't exist)
             try:
                 if User.query.filter_by(email=email).first():
                     flash('Email already exists.', 'error')
@@ -172,7 +170,7 @@ def login():
                     db.session.commit()
                     flash('Account created! Please login.', 'success')
             except Exception as e:
-                flash("Database Error: Tables might be missing. Visit /init_db first.", "error")
+                flash("Table missing error! Go to /init_db first.", "error")
                 print(f"Register Error: {e}")
         
         elif action == 'login':
