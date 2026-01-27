@@ -112,18 +112,31 @@
         }
         .action-btn.primary:hover { background: var(--neon); color: #1f242d; box-shadow: 0 0 20px var(--neon); }
 
-        /* RECOMMENDATIONS */
+        /* --- UPDATED RECOMMENDATIONS --- */
         .rec-section { margin-top: 50px; width: 100%; max-width: 900px; opacity: 0; animation: fadeUp 1s ease-out 0.5s forwards; margin-bottom: 20px;}
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(20px); } }
         
-        .rec-grid { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-top: 20px; }
+        .rec-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); /* Better responsiveness */
+            gap: 30px; 
+            margin-top: 20px; 
+            align-items: stretch; /* Forces equal height */
+        }
         
+        .rec-card-wrap {
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; /* Fill the grid cell */
+        }
+
         .rec-card {
-            background: var(--surface-color); border-radius: 25px; padding: 20px; width: 250px;
+            background: var(--surface-color); border-radius: 25px; padding: 20px; width: 100%;
             box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
             text-decoration: none; color: #fff; transition: 0.3s;
             display: flex; flex-direction: column; align-items: center; border: 1px solid rgba(255,255,255,0.05);
-            position: relative;
+            flex: 1; /* Grow to fill space */
+            justify-content: space-between; /* Space out content inside */
         }
         .rec-card:hover { transform: translateY(-10px); box-shadow: 0 0 20px rgba(0,0,0,0.5); border-color: var(--neon); }
         
@@ -136,7 +149,7 @@
 
         /* ADD CART BUTTON (Rec Card) */
         .rec-add-cart {
-            margin-top: 10px; width: 100%; padding: 8px; border-radius: 10px; border: none;
+            margin-top: 15px; width: 100%; padding: 12px; border-radius: 15px; border: none;
             background: var(--surface-color); color: var(--neon); font-weight: bold; cursor: pointer;
             box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
             transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px;
@@ -193,11 +206,30 @@
 
         /* FLASH MESSAGES */
         .flash { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--surface-color); color: var(--neon); border: 1px solid var(--neon); padding: 10px 20px; border-radius: 15px; z-index: 200; box-shadow: 0 0 15px var(--neon); }
+
+        /* LOADING OVERLAY */
+        #searchLoader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(31, 36, 45, 0.95); z-index: 3000;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .loader-ring {
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 4px solid transparent; border-top: 4px solid var(--neon);
+            animation: spin 1s linear infinite;
+        }
+        .loader-text { margin-top: 20px; color: var(--neon); font-size: 1.2rem; letter-spacing: 2px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <canvas id="bg-canvas"></canvas>
+
+    <div id="searchLoader">
+        <div class="loader-ring"></div>
+        <div class="loader-text">ACCESSING NEURAL NET...</div>
+    </div>
 
     <div class="ticker-wrap">
         <div class="ticker">
@@ -240,7 +272,7 @@
         <h1 style="color:var(--text-sec); text-shadow: 0 0 5px rgba(255,255,255,0.1);">{{ t['hello'] }}, <span style="color:var(--neon);">{{ user.username }}</span>!</h1>
         <p style="color:#777;">{{ t['looking_for'] }}</p>
         
-        <form id="searchForm" action="/search" method="GET" onsubmit="jarvisSpeak('Initiating global search protocol.')">
+        <form id="searchForm" action="/search" method="GET" onsubmit="showLoader()">
             <div class="search-box">
                 <ion-icon name="search" class="icon search-icon" onclick="document.getElementById('searchForm').submit()" title="Click to Search"></ion-icon>
                 
@@ -268,12 +300,13 @@
         <h3 style="text-align:center; color:#777;">{{ t['rec_title'] }} <span style="color:var(--neon);">"{{ rec_topic }}"</span></h3>
         <div class="rec-grid">
             {% for item in recommendations %}
-            <div class="rec-card-wrap" style="position:relative;">
+            <div class="rec-card-wrap">
                 <a href="{{ item.link }}" target="_blank" class="rec-card">
                     <div class="rec-img-box"><img src="{{ item.image }}"></div>
                     <div style="font-weight:bold; margin-bottom:5px;">{{ item.title[:30] }}...</div>
-                    <div style="color:var(--neon); font-size:1.2rem; font-weight:bold; text-shadow: 0 0 5px rgba(0, 238, 255, 0.3);">{{ item.price }}</div>
-                    <div style="font-size:0.8rem; color:#888;">AI Score: <span style="color:var(--neon);">{{ item.score }}%</span></div>
+                    <div style="margin-top:auto; width:100%; text-align:center;"> <div style="color:var(--neon); font-size:1.2rem; font-weight:bold; text-shadow: 0 0 5px rgba(0, 238, 255, 0.3);">{{ item.price }}</div>
+                        <div style="font-size:0.8rem; color:#888;">AI Score: <span style="color:var(--neon);">{{ item.score }}%</span></div>
+                    </div>
                 </a>
                 
                 <form action="/add_to_cart" method="POST" onsubmit="jarvisSpeak('Adding item to cart.')">
@@ -328,15 +361,18 @@
         function jarvisSpeak(text) {
             if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(text);
-                // Try to find a robotic/Google voice
                 const voices = window.speechSynthesis.getVoices();
                 const robotVoice = voices.find(v => v.name.includes("Google US English") || v.name.includes("Samantha"));
                 if (robotVoice) utterance.voice = robotVoice;
-                
-                utterance.pitch = 0.8; // Lower pitch for robot effect
-                utterance.rate = 1.1;  // Slightly faster
+                utterance.pitch = 0.8; 
+                utterance.rate = 1.1;  
                 window.speechSynthesis.speak(utterance);
             }
+        }
+
+        function showLoader() {
+            document.getElementById('searchLoader').style.display = 'flex';
+            jarvisSpeak("Accessing global database. Please wait.");
         }
 
         function startVoiceSearch() {
@@ -364,6 +400,7 @@
                 dataTransfer.items.add(input.files[0]);
                 hiddenInput.files = dataTransfer.files;
                 jarvisSpeak("Analyzing image parameters.");
+                showLoader(); // Show loader for image search too
                 form.submit();
             }
         }
@@ -390,7 +427,6 @@
             .then(res => res.json())
             .then(data => {
                 addMessage(data.response, 'bot');
-                // Speak the response for full AI effect
                 jarvisSpeak(data.response);
                 if(data.redirect) { setTimeout(() => window.location.href = data.redirect, 1500); }
             });
