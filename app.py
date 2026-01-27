@@ -244,17 +244,17 @@ def index():
 @login_required
 def visual_search():
     if 'image' not in request.files:
-        flash('No image uploaded', 'error')
+        # Removed 'No image uploaded' flash
         return redirect(url_for('index'))
     
     file = request.files['image']
     if file.filename == '':
-        flash('No image selected', 'error')
+        # Removed 'No image selected' flash
         return redirect(url_for('index'))
 
     if file:
         try:
-            # Removed the "Uploading..." flash message to prevent lingering banners.
+            # Removed "Uploading..." flash
             upload_result = cloudinary.uploader.upload(file)
             img_url = upload_result["secure_url"]
             
@@ -267,6 +267,7 @@ def visual_search():
             
             if "visual_matches" in data and len(data["visual_matches"]) > 0:
                 best_match = data["visual_matches"][0].get("title")
+                # Removed "AI identified" flash
                 return redirect(url_for('search', q=best_match))
             else:
                 flash("AI couldn't identify the image. Try a clearer photo.", "error")
@@ -291,7 +292,7 @@ def update_profile():
     if request.form.get("password"):
         current_user.password = generate_password_hash(request.form.get("password"), method='pbkdf2:sha256')
     db.session.commit()
-    flash('Profile updated!', 'success')
+    # Removed "Profile Updated" flash
     return redirect(url_for('account'))
 
 @app.route("/wishlist")
@@ -306,7 +307,7 @@ def add_to_wishlist():
     link = request.form.get("link")
     exists = Wishlist.query.filter_by(user_id=current_user.id, link=link).first()
     if exists:
-        flash('Item is already in your wishlist!', 'info')
+        pass # Removed "Already in wishlist" flash
     else:
         new_item = Wishlist(
             user_id=current_user.id, title=request.form.get("title"), price=request.form.get("price"), 
@@ -314,7 +315,7 @@ def add_to_wishlist():
         )
         db.session.add(new_item)
         db.session.commit()
-        flash('Added to Wishlist!', 'success')
+        # Removed "Added to Wishlist" flash
     return redirect(request.referrer)
 
 @app.route("/remove_wishlist/<int:id>")
@@ -324,7 +325,7 @@ def remove_wishlist(id):
     if item.user_id == current_user.id:
         db.session.delete(item)
         db.session.commit()
-        flash('Removed from Wishlist.', 'success')
+        # Removed "Removed from Wishlist" flash
     return redirect(url_for('wishlist'))
 
 @app.route("/cart")
@@ -346,7 +347,7 @@ def add_to_cart():
     )
     db.session.add(new_item)
     db.session.commit()
-    flash('Added to Cart!', 'success')
+    # Removed "Added to Cart" flash
     return redirect(request.referrer)
 
 @app.route("/remove_cart/<int:id>")
@@ -356,7 +357,7 @@ def remove_cart(id):
     if item.user_id == current_user.id:
         db.session.delete(item)
         db.session.commit()
-        flash('Removed from Cart.', 'success')
+        # Removed "Removed from Cart" flash
     return redirect(url_for('cart'))
 
 @app.route("/checkout")
@@ -364,7 +365,7 @@ def remove_cart(id):
 def checkout_page():
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
     if not cart_items:
-        flash("Your cart is empty!", "error")
+        # Removed "Cart is empty" flash (optional, but consistent)
         return redirect(url_for('cart'))
     total_price = sum(item.price_val for item in cart_items)
     return render_template("payment.html", total=total_price)
