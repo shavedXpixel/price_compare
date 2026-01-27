@@ -24,13 +24,29 @@
         body { 
             display: flex; justify-content: center; align-items: center; flex-direction: column;
             min-height: 100vh; background: var(--bg-color); color: var(--text-main); 
-            overflow-x: hidden;
+            overflow-x: hidden; padding-top: 60px; /* Space for Ticker */
         }
         
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
 
+        /* --- HOLOGRAPHIC TICKER --- */
+        .ticker-wrap {
+            position: fixed; top: 0; left: 0; width: 100%; height: 40px; 
+            background: rgba(31, 36, 45, 0.95); border-bottom: 1px solid var(--neon);
+            overflow: hidden; z-index: 1000; display: flex; align-items: center;
+            box-shadow: 0 0 15px rgba(0, 238, 255, 0.2);
+        }
+        .ticker {
+            display: flex; animation: ticker 20s linear infinite; white-space: nowrap;
+        }
+        .ticker-item {
+            padding: 0 30px; color: var(--neon); font-size: 0.9rem; font-weight: 500; text-transform: uppercase;
+            display: flex; align-items: center; gap: 10px;
+        }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
         /* NAVBAR */
-        .nav-bar { position: absolute; top: 20px; right: 30px; display: flex; gap: 15px; align-items: center; z-index: 100; }
+        .nav-bar { position: absolute; top: 60px; right: 30px; display: flex; gap: 15px; align-items: center; z-index: 100; }
         
         .clay-btn-sm {
             padding: 10px 20px; border-radius: 15px; 
@@ -38,7 +54,7 @@
             font-weight: 600; color: var(--text-sec); text-decoration: none; cursor: pointer;
             box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
             transition: 0.2s;
-            display: flex; align-items: center; gap: 8px; /* Added Flex for Icons */
+            display: flex; align-items: center; gap: 8px;
         }
         .clay-btn-sm:hover { color: var(--neon); transform: translateY(-2px); box-shadow: 0 0 15px rgba(0, 238, 255, 0.2); }
         .clay-btn-sm:active { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
@@ -52,7 +68,7 @@
 
         /* MAIN SEARCH WRAPPER */
         .wrapper { 
-            width: 90%; max-width: 600px; margin-top: 100px; text-align: center;
+            width: 90%; max-width: 600px; margin-top: 80px; text-align: center;
             background: var(--surface-color); border-radius: 40px;
             box-shadow: 15px 15px 30px rgba(0,0,0,0.5), -10px -10px 30px rgba(255,255,255,0.05);
             padding: 50px; position: relative; z-index: 10;
@@ -183,6 +199,20 @@
 
     <canvas id="bg-canvas"></canvas>
 
+    <div class="ticker-wrap">
+        <div class="ticker">
+            <div class="ticker-item"><ion-icon name="trending-up"></ion-icon> LIVE: Apple Vision Pro +20%</div>
+            <div class="ticker-item"><ion-icon name="flash"></ion-icon> FLASH SALE: 50% OFF Gaming Gear</div>
+            <div class="ticker-item"><ion-icon name="people"></ion-icon> 2,400 Users Online</div>
+            <div class="ticker-item"><ion-icon name="rocket"></ion-icon> New AI Features Unlocked</div>
+            <div class="ticker-item"><ion-icon name="time"></ion-icon> Cyber Week Starts in 04:32:10</div>
+            <div class="ticker-item"><ion-icon name="trending-up"></ion-icon> LIVE: Apple Vision Pro +20%</div>
+            <div class="ticker-item"><ion-icon name="flash"></ion-icon> FLASH SALE: 50% OFF Gaming Gear</div>
+            <div class="ticker-item"><ion-icon name="people"></ion-icon> 2,400 Users Online</div>
+            <div class="ticker-item"><ion-icon name="rocket"></ion-icon> New AI Features Unlocked</div>
+        </div>
+    </div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}<div class="flash">{{ message }}</div>{% endfor %}
@@ -196,21 +226,21 @@
             <option value="od" {% if lang == 'od' %}selected{% endif %}>Odia</option>
         </select>
 
-        <a href="/cart" class="clay-btn-sm" title="Go to Cart">
+        <a href="/cart" class="clay-btn-sm" title="Go to Cart" onclick="jarvisSpeak('Opening secure storage.')">
             <ion-icon name="cart" style="font-size:1.2rem;"></ion-icon> Cart
         </a>
 
         {% if user.email == 'pupuhari123@gmail.com' %}
             <a href="/admin" class="clay-btn-sm">{{ t['admin_btn'] }}</a>
         {% endif %}
-        <a href="/logout" class="clay-btn-sm">{{ t['logout_btn'] }}</a>
+        <a href="/logout" class="clay-btn-sm" onclick="jarvisSpeak('Signing off. Goodbye.')">{{ t['logout_btn'] }}</a>
     </div>
 
     <div class="wrapper">
         <h1 style="color:var(--text-sec); text-shadow: 0 0 5px rgba(255,255,255,0.1);">{{ t['hello'] }}, <span style="color:var(--neon);">{{ user.username }}</span>!</h1>
         <p style="color:#777;">{{ t['looking_for'] }}</p>
         
-        <form id="searchForm" action="/search" method="GET">
+        <form id="searchForm" action="/search" method="GET" onsubmit="jarvisSpeak('Initiating global search protocol.')">
             <div class="search-box">
                 <ion-icon name="search" class="icon search-icon" onclick="document.getElementById('searchForm').submit()" title="Click to Search"></ion-icon>
                 
@@ -227,8 +257,8 @@
 
             <div class="btn-group">
                 <button type="submit" class="action-btn primary">{{ t['search_btn'] }}</button>
-                <a href="/account" style="flex:1;"><button type="button" class="action-btn">{{ t['history_btn'] }}</button></a>
-                <a href="/wishlist" style="flex:1;"><button type="button" class="action-btn">Wishlist</button></a>
+                <a href="/account" style="flex:1;"><button type="button" class="action-btn" onclick="jarvisSpeak('Accessing history logs.')">{{ t['history_btn'] }}</button></a>
+                <a href="/wishlist" style="flex:1;"><button type="button" class="action-btn" onclick="jarvisSpeak('Opening wishlist.')">Wishlist</button></a>
             </div>
         </form>
     </div>
@@ -246,7 +276,7 @@
                     <div style="font-size:0.8rem; color:#888;">AI Score: <span style="color:var(--neon);">{{ item.score }}%</span></div>
                 </a>
                 
-                <form action="/add_to_cart" method="POST">
+                <form action="/add_to_cart" method="POST" onsubmit="jarvisSpeak('Adding item to cart.')">
                     <input type="hidden" name="title" value="{{ item.title }}">
                     <input type="hidden" name="price" value="{{ item.price }}">
                     <input type="hidden" name="image" value="{{ item.image }}">
@@ -294,14 +324,32 @@
         function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
         gsap.from(".wrapper", { duration: 1.2, y: 50, opacity: 0, ease: "power3.out" });
 
+        // --- JARVIS VOICE FUNCTION ---
+        function jarvisSpeak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                // Try to find a robotic/Google voice
+                const voices = window.speechSynthesis.getVoices();
+                const robotVoice = voices.find(v => v.name.includes("Google US English") || v.name.includes("Samantha"));
+                if (robotVoice) utterance.voice = robotVoice;
+                
+                utterance.pitch = 0.8; // Lower pitch for robot effect
+                utterance.rate = 1.1;  // Slightly faster
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
         function startVoiceSearch() {
             if ('webkitSpeechRecognition' in window) {
                 const recognition = new webkitSpeechRecognition();
                 const icon = document.querySelector('ion-icon[name="mic"]');
+                jarvisSpeak("I am listening.");
                 recognition.onstart = () => { icon.classList.add('listening'); };
                 recognition.onend = () => { icon.classList.remove('listening'); };
                 recognition.onresult = (e) => { 
-                    document.getElementById('searchInput').value = e.results[0][0].transcript; 
+                    const text = e.results[0][0].transcript;
+                    document.getElementById('searchInput').value = text; 
+                    jarvisSpeak("Processing search for " + text);
                     document.getElementById('searchForm').submit(); 
                 };
                 recognition.start();
@@ -315,6 +363,7 @@
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(input.files[0]);
                 hiddenInput.files = dataTransfer.files;
+                jarvisSpeak("Analyzing image parameters.");
                 form.submit();
             }
         }
@@ -341,6 +390,8 @@
             .then(res => res.json())
             .then(data => {
                 addMessage(data.response, 'bot');
+                // Speak the response for full AI effect
+                jarvisSpeak(data.response);
                 if(data.redirect) { setTimeout(() => window.location.href = data.redirect, 1500); }
             });
         }
