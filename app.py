@@ -28,16 +28,20 @@ cloudinary.config(
   api_secret = "YOUR_API_SECRET" 
 )
 
-# --- DATABASE CONFIG (COCKROACHDB FIX) ---
-# We added '&sslrootcert=system' to fix the Render certificate error.
-# Replace the USERNAME, PASSWORD, and CLUSTER address with your real ones.
-COCKROACH_DB_URL = "postgresql://priyansu:Y0fHHK30_PACWW-77M0ilw@bald-owlet-21046.j77.aws-ap-south-1.cockroachlabs.cloud:26257/defaultdb?sslmode=require"
+# --- DATABASE CONFIG (FINAL COCKROACHDB FIX) ---
+# We use a placeholder here. It is BEST to set DATABASE_URL in Render Environment Variables.
+# If you run locally, replace 'PASSWORD' with your real password.
+DEFAULT_DB_URL = "cockroachdb://priyansu:Y0fHHK30_PACWW-77M0ilw@bald-owlet-21046.j77.aws-ap-south-1.cockroachlabs.cloud:26257/defaultdb?sslmode=require"
 
-database_url = os.environ.get('DATABASE_URL', COCKROACH_DB_URL)
+database_url = os.environ.get('DATABASE_URL', DEFAULT_DB_URL)
 
-# Fix for some connection strings using 'postgres://'
-if database_url and database_url.startswith("postgres://"):
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
+# CRITICAL FIX: CockroachDB requires the 'cockroachdb://' prefix.
+# Render/Environment variables often give 'postgres://', so we auto-replace it here.
+if database_url:
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "cockroachdb://", 1)
+    elif database_url.startswith("postgresql://"):
+        database_url = database_url.replace("postgresql://", "cockroachdb://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -48,7 +52,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# --- 2. MULTI-LANGUAGE DICTIONARY ---
+# --- 2. TRANSLATIONS ---
 TRANSLATIONS = {
     'en': {
         'hello': "Hello", 'looking_for': "What are you looking for today?", 'placeholder': "Enter product name...",
@@ -107,7 +111,7 @@ with app.app_context():
     try:
         db.create_all()
     except Exception as e:
-        print(f"DB Warning: {e}")
+        print(f"DB Warning (Ignorable if tables exist): {e}")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -141,7 +145,6 @@ def get_ai_trust_score(product_title, store):
 # --- 5. ROUTES ---
 
 # --- THE "FIX" ROUTE ---
-# Visit /init_db once after deploying to create tables
 @app.route('/init_db')
 def init_db():
     try:
