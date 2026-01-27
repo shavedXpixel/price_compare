@@ -48,8 +48,6 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-
-# DISABLE "PLEASE LOG IN" MESSAGE
 login_manager.login_message = None 
 
 # --- 2. TRANSLATIONS ---
@@ -256,7 +254,7 @@ def visual_search():
 
     if file:
         try:
-            flash("Uploading image to AI cloud...", "info")
+            # Removed the "Uploading..." flash message to prevent lingering banners.
             upload_result = cloudinary.uploader.upload(file)
             img_url = upload_result["secure_url"]
             
@@ -269,7 +267,6 @@ def visual_search():
             
             if "visual_matches" in data and len(data["visual_matches"]) > 0:
                 best_match = data["visual_matches"][0].get("title")
-                # REMOVED the "AI Identified" flash message here.
                 return redirect(url_for('search', q=best_match))
             else:
                 flash("AI couldn't identify the image. Try a clearer photo.", "error")
