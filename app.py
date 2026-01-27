@@ -9,7 +9,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 from datetime import datetime
 from textblob import TextBlob
 from sqlalchemy import func
@@ -30,13 +29,17 @@ cloudinary.config(
   api_secret = "YOUR_API_SECRET" 
 )
 
-# Database Config (Neon + Local Fallback)
-NEON_DB_URL = "postgresql://neondb_owner:npg_d3OshXYJxvl6@ep-misty-hat-a1bla5w6.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+# --- DATABASE CONFIG (SUPABASE / NEON) ---
+# TIP: If using Supabase, make sure your URL uses port 6543 (Transaction Pooler) for speed.
+# Example: postgresql://...:6543/postgres
+# If your link starts with 'postgres://', we auto-fix it to 'postgresql://' below.
 
-database_url = os.environ.get('DATABASE_URL')
-if not database_url:
-    database_url = NEON_DB_URL 
+# Default to a local fallback or set your live URL here
+DEFAULT_DB_URL = "postgresql://postgres.fsciqijjjqormmcgrrhv:JkZNbakX0vwpIdC4@aws-1-ap-south-1.pooler.supabase.com:6543/postgres"
 
+database_url = os.environ.get('DATABASE_URL', DEFAULT_DB_URL)
+
+# SQLAlchemy requires 'postgresql://', but some providers give 'postgres://'
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
@@ -48,7 +51,6 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-login_manager.login_message = None 
 
 # --- 2. MULTI-LANGUAGE DICTIONARY ---
 TRANSLATIONS = {
@@ -104,7 +106,7 @@ class Cart(db.Model):
     image = db.Column(db.String(500))
     store = db.Column(db.String(100))
 
-# Create Tables
+# Create Tables (Safe to run multiple times)
 with app.app_context():
     db.create_all()
 
@@ -116,23 +118,29 @@ def load_user(user_id):
 def extract_price(p):
     if not p: return 0
     try:
+        # Removes currency symbols and commas to get a pure float
         return float(p.replace("₹", "").replace("$", "").replace(",", "").strip().split()[0]) 
     except:
         return 0
 
 def get_ai_trust_score(product_title, store):
+    # Mock AI Trust Score Logic
     if "amazon" in store.lower() or "flipkart" in store.lower():
         base_reviews = ["Great product", "Fast delivery", "Genuine item", "Loved it", "Good packaging"]
     else:
         base_reviews = ["Okay product", "Late delivery", "Average quality", "Decent for the price"]
+    
     variations = ["Worth the money", "Not bad", "Could be better", "Amazing performance", "Terrible support"]
     product_reviews = random.sample(base_reviews + variations, 5)
+    
     total_polarity = 0
     for review in product_reviews:
         analysis = TextBlob(review)
         total_polarity += analysis.sentiment.polarity
+    
     avg_polarity = total_polarity / len(product_reviews)
-    trust_score = int((avg_polarity + 1) * 50) 
+    trust_score = int((avg_polarity + 1) * 50) # Convert -1..1 to 0..100
+    
     if "amazon" in store.lower() or "flipkart" in store.lower():
         trust_score += 10
     return min(max(trust_score, 0), 100)
@@ -195,7 +203,7 @@ def reset_request():
             return redirect(url_for('reset_request'))
     return render_template('reset_request.html', step='email')
 
-# --- MAIN ROUTE ---
+# --- MAIN HOME ROUTE ---
 @app.route("/")
 @login_required
 def index():
@@ -207,12 +215,13 @@ def index():
     query = "futuristic gadgets"
     if last_search: query = last_search.search_query
 
+    # Fetch Recommendations from Google Shopping
     try:
         params = {"engine": "google_shopping", "q": query, "hl": "en", "gl": "in", "api_key": SERP_API_KEY, "num": 3}
         data = requests.get("https://serpapi.com/search", params=params).json()
         
         for item in data.get("shopping_results", [])[:3]:
-            # Link Fix for Recommendations
+            # Clean up the link
             link = item.get("link") or item.get("product_link")
             if link and link.startswith("/"):
                 link = f"https://www.google.com{link}"
@@ -223,7 +232,7 @@ def index():
                 "link": link, "score": trust_score
             })
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error fetching recs: {e}")
     
     return render_template("index.html", user=current_user, recommendations=recommendations, rec_topic=query, t=t, lang=lang)
 
@@ -242,12 +251,12 @@ def visual_search():
 
     if file:
         try:
-            # 1. Upload directly to Cloudinary
+            # 1. Upload to Cloudinary (No local storage needed)
             flash("Uploading image to AI cloud...", "info")
             upload_result = cloudinary.uploader.upload(file)
             img_url = upload_result["secure_url"]
             
-            # 2. Send Public URL to Google Lens (SerpApi)
+            # 2. Analyze with Google Lens
             params = {
                 "engine": "google_lens",
                 "url": img_url,
@@ -255,7 +264,7 @@ def visual_search():
             }
             data = requests.get("https://serpapi.com/search", params=params).json()
             
-            # 3. Extract Best Match
+            # 3. Find Best Match Title
             if "visual_matches" in data and len(data["visual_matches"]) > 0:
                 best_match = data["visual_matches"][0].get("title")
                 flash(f"AI identified: {best_match}", "success")
@@ -265,7 +274,7 @@ def visual_search():
 
         except Exception as e:
             print(f"Visual Search Error: {e}")
-            flash("Visual search failed. Check console for details.", "error")
+            flash("Visual search failed. Check console.", "error")
             
     return redirect(url_for('index'))
 
@@ -352,11 +361,12 @@ def remove_cart(id):
         flash('Removed from Cart.', 'success')
     return redirect(url_for('cart'))
 
-# --- NEW CHECKOUT FLOW (Payment -> Invoice) ---
+# --- CHECKOUT FLOW (Payment -> Invoice) ---
 
 @app.route("/checkout")
 @login_required
 def checkout_page():
+    # 1. Shows the Payment UI (payment.html)
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
     if not cart_items:
         flash("Your cart is empty!", "error")
@@ -367,7 +377,7 @@ def checkout_page():
 @app.route("/generate_invoice")
 @login_required
 def generate_invoice():
-    # 1. Get Items
+    # 2. Generates PDF and Clears Cart
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
     if not cart_items:
         return redirect(url_for('cart'))
@@ -375,14 +385,14 @@ def generate_invoice():
     total_price = sum(item.price_val for item in cart_items)
     date_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    # 2. Render HTML for PDF
+    # Render PDF Template
     rendered_html = render_template("invoice_pdf.html", user=current_user, items=cart_items, total=total_price, date=date_now)
     
-    # 3. Clear Cart
+    # Clear Cart from DB
     for item in cart_items: db.session.delete(item)
     db.session.commit()
     
-    # 4. Generate PDF
+    # Create PDF Buffer
     pdf_buffer = io.BytesIO()
     pisa_status = pisa.CreatePDF(io.BytesIO(rendered_html.encode("utf-8")), dest=pdf_buffer)
     
@@ -391,17 +401,21 @@ def generate_invoice():
     
     return send_file(pdf_buffer, as_attachment=True, download_name=f"Invoice_{current_user.username}.pdf", mimetype='application/pdf')
 
+# --- SEARCH & RESULTS ---
 @app.route("/search", methods=["GET", "POST"])
 @login_required
 def search():
     product = request.args.get("q") or request.form.get("product")
     sort_order = request.args.get("sort")
     if not product: return redirect(url_for('index'))
+    
+    # Save History
     if request.method == "POST" or (request.args.get("q") and not request.args.get("sort")):
         last = SearchHistory.query.filter_by(user_id=current_user.id).order_by(SearchHistory.timestamp.desc()).first()
         if not last or last.search_query != product:
             db.session.add(SearchHistory(user_id=current_user.id, search_query=product))
             db.session.commit()
+    
     try:
         params = {"engine": "google_shopping", "q": product, "hl": "en", "gl": "in", "api_key": SERP_API_KEY}
         data = requests.get("https://serpapi.com/search", params=params).json()
@@ -451,19 +465,30 @@ def admin():
     values = [s[1] for s in top_searches]
     return render_template("admin.html", total_users=total_users, total_searches=total_searches, total_wishlist=total_wishlist, labels=labels, values=values, user=current_user)
 
+# --- CHATBOT API ---
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message", "").lower()
+    redirect_url = None
+    
     if "hello" in user_message or "hi" in user_message: response = "Hello! I am your Future Shop Assistant."
     elif "help" in user_message: response = "Try saying 'Search for iPhone' or 'Go to wishlist'."
     elif "search for" in user_message:
         query = user_message.replace("search for", "").strip()
-        return jsonify({"response": f"Searching for {query}...", "redirect": url_for('search', q=query)})
-    elif "wishlist" in user_message: return jsonify({"response": "Opening wishlist...", "redirect": url_for('wishlist')})
-    elif "cart" in user_message: return jsonify({"response": "Opening shopping cart...", "redirect": url_for('cart')})
-    elif "history" in user_message: return jsonify({"response": "Opening history...", "redirect": url_for('account')})
+        response = f"Searching for {query}..."
+        redirect_url = url_for('search', q=query)
+    elif "wishlist" in user_message: 
+        response = "Opening wishlist..."
+        redirect_url = url_for('wishlist')
+    elif "cart" in user_message: 
+        response = "Opening shopping cart..."
+        redirect_url = url_for('cart')
+    elif "history" in user_message: 
+        response = "Opening history..."
+        redirect_url = url_for('account')
     else: response = "I didn't quite catch that."
-    return jsonify({"response": response})
+    
+    return jsonify({"response": response, "redirect": redirect_url})
 
 if __name__ == "__main__":
     app.run(debug=True)
