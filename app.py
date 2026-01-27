@@ -18,15 +18,16 @@ from xhtml2pdf import pisa
 app = Flask(__name__)
 
 # --- 1. CONFIGURATION ---
+
 # SERP API KEY (For Google Shopping & Lens)
 SERP_API_KEY = "d66eccb121b3453152187f2442537b0fe5b3c82c4b8d4d56b89ed4d52c9f01a6"
 
 # CLOUDINARY CONFIG (For Visual Search Image Hosting)
 # GET THESE FREE FROM: https://cloudinary.com/console
 cloudinary.config(
-  cloud_name = "dexdiyp2g", 
-  api_key = "385994499446587", 
-  api_secret = "CNR7F68BiUiDwmvMlVTTeDaK2qE" 
+  cloud_name = "YOUR_CLOUD_NAME", 
+  api_key = "YOUR_API_KEY", 
+  api_secret = "YOUR_API_SECRET" 
 )
 
 # Database Config (Neon + Local Fallback)
@@ -351,22 +352,43 @@ def remove_cart(id):
         flash('Removed from Cart.', 'success')
     return redirect(url_for('cart'))
 
+# --- NEW CHECKOUT FLOW (Payment -> Invoice) ---
+
 @app.route("/checkout")
 @login_required
-def checkout():
+def checkout_page():
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
     if not cart_items:
         flash("Your cart is empty!", "error")
         return redirect(url_for('cart'))
     total_price = sum(item.price_val for item in cart_items)
+    return render_template("payment.html", total=total_price)
+
+@app.route("/generate_invoice")
+@login_required
+def generate_invoice():
+    # 1. Get Items
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+    if not cart_items:
+        return redirect(url_for('cart'))
+        
+    total_price = sum(item.price_val for item in cart_items)
     date_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # 2. Render HTML for PDF
     rendered_html = render_template("invoice_pdf.html", user=current_user, items=cart_items, total=total_price, date=date_now)
+    
+    # 3. Clear Cart
     for item in cart_items: db.session.delete(item)
     db.session.commit()
+    
+    # 4. Generate PDF
     pdf_buffer = io.BytesIO()
     pisa_status = pisa.CreatePDF(io.BytesIO(rendered_html.encode("utf-8")), dest=pdf_buffer)
+    
     if pisa_status.err: return "Error creating PDF", 500
     pdf_buffer.seek(0)
+    
     return send_file(pdf_buffer, as_attachment=True, download_name=f"Invoice_{current_user.username}.pdf", mimetype='application/pdf')
 
 @app.route("/search", methods=["GET", "POST"])

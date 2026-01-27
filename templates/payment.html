@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure Payment</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        :root { --bg-color: #1f242d; --surface-color: #262c36; --neon: #0ef; --shadow-dark: rgba(0, 0, 0, 0.6); --shadow-light: rgba(255, 255, 255, 0.05); }
+
+        body { 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; 
+            background: var(--bg-color); color: #fff; flex-direction: column; gap: 30px;
+        }
+
+        h1 { color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+
+        /* PAYMENT CONTAINER */
+        .container {
+            position: relative; width: 400px;
+            background: var(--surface-color); border-radius: 30px; padding: 40px;
+            box-shadow: 15px 15px 30px var(--shadow-dark), -10px -10px 30px var(--shadow-light);
+        }
+
+        /* VIRTUAL CARD */
+        .card-wrapper {
+            width: 100%; height: 200px; margin-bottom: 30px; perspective: 1000px;
+        }
+        .card-inner {
+            width: 100%; height: 100%; position: relative; text-align: center;
+            transition: transform 0.6s; transform-style: preserve-3d;
+        }
+        .card-inner.flipped { transform: rotateY(180deg); }
+
+        .front, .back {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border-radius: 20px; padding: 20px;
+            background: linear-gradient(135deg, #0ef, #1f242d);
+            box-shadow: 0 10px 20px rgba(0, 238, 255, 0.3);
+            display: flex; flex-direction: column; justify-content: space-between; color: #fff;
+        }
+        .back { transform: rotateY(180deg); background: linear-gradient(135deg, #1f242d, #0ef); }
+
+        .chip { width: 50px; height: 35px; background: #e0e0e0; border-radius: 5px; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .chip::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: #999; }
+        
+        .card-number { font-size: 1.4rem; letter-spacing: 2px; text-shadow: 1px 1px 2px #000; }
+        .card-holder { font-size: 0.9rem; text-transform: uppercase; }
+        
+        .cvv-strip { width: 100%; height: 40px; background: #000; margin-top: 20px; }
+        .cvv-box { background: #fff; color: #000; width: 80%; margin: 10px auto; height: 30px; line-height: 30px; text-align: right; padding-right: 10px; font-weight: bold; border-radius: 5px; }
+
+        /* FORM */
+        .input-group { margin-bottom: 15px; }
+        label { font-size: 0.8rem; color: #aaa; display: block; margin-bottom: 5px; }
+        input {
+            width: 100%; padding: 12px; border-radius: 10px; border: none; outline: none;
+            background: var(--bg-color); color: #fff;
+            box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+            transition: 0.2s;
+        }
+        input:focus { border: 1px solid var(--neon); box-shadow: 0 0 10px var(--neon); }
+
+        .row { display: flex; gap: 15px; }
+
+        .pay-btn {
+            width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer;
+            background: var(--surface-color); color: var(--neon); margin-top: 20px;
+            box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            transition: 0.2s;
+        }
+        .pay-btn:hover { background: var(--neon); color: #1f242d; box-shadow: 0 0 20px var(--neon); }
+
+        /* MODAL LOADING */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { width: 50px; height: 50px; border: 5px solid var(--surface-color); border-top: 5px solid var(--neon); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <h1>Secure Checkout</h1>
+
+    <div class="container">
+        <div class="card-wrapper" onclick="this.querySelector('.card-inner').classList.toggle('flipped')">
+            <div class="card-inner">
+                <div class="front">
+                    <div class="chip"></div>
+                    <div class="card-number" id="dispNum">#### #### #### ####</div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span class="card-holder" id="dispHolder">FULL NAME</span>
+                        <span id="dispExp">MM/YY</span>
+                    </div>
+                </div>
+                <div class="back">
+                    <div class="cvv-strip"></div>
+                    <div class="cvv-box" id="dispCvv">***</div>
+                    <div style="text-align:right; margin-top:20px; font-size:0.8rem;">Future Shop Secure Pay</div>
+                </div>
+            </div>
+        </div>
+
+        <form id="payForm" onsubmit="processPayment(event)">
+            <div class="input-group">
+                <label>Card Number</label>
+                <input type="text" maxlength="19" placeholder="1234 5678 1234 5678" oninput="updateNum(this)" required>
+            </div>
+            <div class="input-group">
+                <label>Cardholder Name</label>
+                <input type="text" placeholder="John Doe" oninput="document.getElementById('dispHolder').innerText = this.value.toUpperCase() || 'FULL NAME'" required>
+            </div>
+            <div class="row">
+                <div class="input-group">
+                    <label>Expiry</label>
+                    <input type="text" placeholder="MM/YY" maxlength="5" oninput="document.getElementById('dispExp').innerText = this.value || 'MM/YY'" required>
+                </div>
+                <div class="input-group">
+                    <label>CVV</label>
+                    <input type="password" maxlength="3" placeholder="123" onfocus="flipCard(true)" onblur="flipCard(false)" oninput="document.getElementById('dispCvv').innerText = this.value || '***'" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="pay-btn">Pay <span id="totalAmount"></span> & Download</button>
+        </form>
+    </div>
+
+    <div id="loadingModal" class="modal">
+        <div class="spinner"></div>
+        <h2 style="color:#fff;">Processing Payment...</h2>
+    </div>
+
+    <script>
+        // Get total from URL or Server
+        document.getElementById('totalAmount').innerText = "(Secure)";
+
+        function updateNum(input) {
+            let val = input.value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
+            input.value = val;
+            document.getElementById('dispNum').innerText = val || '#### #### #### ####';
+        }
+
+        function flipCard(isBack) {
+            const card = document.querySelector('.card-inner');
+            if (isBack) card.classList.add('flipped');
+            else card.classList.remove('flipped');
+        }
+
+        function processPayment(e) {
+            e.preventDefault();
+            const modal = document.getElementById('loadingModal');
+            modal.style.display = 'flex';
+
+            // Simulate Network Delay
+            setTimeout(() => {
+                // Redirect to the ACTUAL PDF generation route
+                window.location.href = "/generate_invoice"; 
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
