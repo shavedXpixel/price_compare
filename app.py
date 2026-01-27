@@ -18,28 +18,24 @@ app = Flask(__name__)
 
 # --- 1. CONFIGURATION ---
 
-# SERP API KEY (For Google Shopping & Lens)
+# SERP API KEY
 SERP_API_KEY = "d66eccb121b3453152187f2442537b0fe5b3c82c4b8d4d56b89ed4d52c9f01a6"
 
-# CLOUDINARY CONFIG (For Visual Search Image Hosting)
-# GET THESE FREE FROM: https://cloudinary.com/console
+# CLOUDINARY CONFIG
 cloudinary.config(
   cloud_name = "YOUR_CLOUD_NAME", 
   api_key = "YOUR_API_KEY", 
   api_secret = "YOUR_API_SECRET" 
 )
 
-# --- DATABASE CONFIG (SUPABASE / NEON) ---
-# TIP: If using Supabase, make sure your URL uses port 6543 (Transaction Pooler) for speed.
-# Example: postgresql://...:6543/postgres
-# If your link starts with 'postgres://', we auto-fix it to 'postgresql://' below.
+# --- DATABASE CONFIG (COCKROACHDB) ---
+# Paste your CockroachDB URL below (or set it in Render Env Vars)
+# It usually ends with '?sslmode=verify-full'
+COCKROACH_DB_URL = "postgresql://priyansu:Y0fHHK30_PACWW-77M0ilw@bald-owlet-21046.j77.aws-ap-south-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full"
 
-# Default to a local fallback or set your live URL here
-DEFAULT_DB_URL = "postgresql://postgres.fsciqijjjqormmcgrrhv:JkZNbakX0vwpIdC4@aws-1-ap-south-1.pooler.supabase.com:6543/postgres"
+database_url = os.environ.get('DATABASE_URL', COCKROACH_DB_URL)
 
-database_url = os.environ.get('DATABASE_URL', DEFAULT_DB_URL)
-
-# SQLAlchemy requires 'postgresql://', but some providers give 'postgres://'
+# Fix for some connection strings using 'postgres://'
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
@@ -106,9 +102,13 @@ class Cart(db.Model):
     image = db.Column(db.String(500))
     store = db.Column(db.String(100))
 
-# Create Tables (Safe to run multiple times)
+# --- TABLE CREATION (Attempt to run on start) ---
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+        print("Database connected and tables created!")
+    except Exception as e:
+        print(f"DB Connection Warning: {e}")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -118,34 +118,38 @@ def load_user(user_id):
 def extract_price(p):
     if not p: return 0
     try:
-        # Removes currency symbols and commas to get a pure float
         return float(p.replace("₹", "").replace("$", "").replace(",", "").strip().split()[0]) 
     except:
         return 0
 
 def get_ai_trust_score(product_title, store):
-    # Mock AI Trust Score Logic
     if "amazon" in store.lower() or "flipkart" in store.lower():
         base_reviews = ["Great product", "Fast delivery", "Genuine item", "Loved it", "Good packaging"]
     else:
         base_reviews = ["Okay product", "Late delivery", "Average quality", "Decent for the price"]
-    
     variations = ["Worth the money", "Not bad", "Could be better", "Amazing performance", "Terrible support"]
     product_reviews = random.sample(base_reviews + variations, 5)
-    
     total_polarity = 0
     for review in product_reviews:
         analysis = TextBlob(review)
         total_polarity += analysis.sentiment.polarity
-    
     avg_polarity = total_polarity / len(product_reviews)
-    trust_score = int((avg_polarity + 1) * 50) # Convert -1..1 to 0..100
-    
+    trust_score = int((avg_polarity + 1) * 50) 
     if "amazon" in store.lower() or "flipkart" in store.lower():
         trust_score += 10
     return min(max(trust_score, 0), 100)
 
 # --- 5. ROUTES ---
+
+# --- THE "FIX" ROUTE ---
+# VISIT THIS LINK ONCE TO FIX "INTERNAL SERVER ERROR"
+@app.route('/init_db')
+def init_db():
+    try:
+        db.create_all()
+        return "<h1>Success! Database Tables Created. You can now Register.</h1>"
+    except Exception as e:
+        return f"<h1>Error creating tables: {e}</h1>"
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -157,14 +161,19 @@ def login():
         
         if action == 'register':
             email = request.form.get('email')
-            if User.query.filter_by(email=email).first():
-                flash('Email already exists.', 'error')
-            else:
-                hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
-                new_user = User(username=user_input, email=email, password=hashed_pw)
-                db.session.add(new_user)
-                db.session.commit()
-                flash('Account created! Please login.', 'success')
+            # Check if user exists (Handling DB errors if table doesn't exist)
+            try:
+                if User.query.filter_by(email=email).first():
+                    flash('Email already exists.', 'error')
+                else:
+                    hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
+                    new_user = User(username=user_input, email=email, password=hashed_pw)
+                    db.session.add(new_user)
+                    db.session.commit()
+                    flash('Account created! Please login.', 'success')
+            except Exception as e:
+                flash("Database Error: Tables might be missing. Visit /init_db first.", "error")
+                print(f"Register Error: {e}")
         
         elif action == 'login':
             user = User.query.filter((User.username == user_input) | (User.email == user_input)).first()
@@ -203,7 +212,6 @@ def reset_request():
             return redirect(url_for('reset_request'))
     return render_template('reset_request.html', step='email')
 
-# --- MAIN HOME ROUTE ---
 @app.route("/")
 @login_required
 def index():
@@ -215,13 +223,11 @@ def index():
     query = "futuristic gadgets"
     if last_search: query = last_search.search_query
 
-    # Fetch Recommendations from Google Shopping
     try:
         params = {"engine": "google_shopping", "q": query, "hl": "en", "gl": "in", "api_key": SERP_API_KEY, "num": 3}
         data = requests.get("https://serpapi.com/search", params=params).json()
         
         for item in data.get("shopping_results", [])[:3]:
-            # Clean up the link
             link = item.get("link") or item.get("product_link")
             if link and link.startswith("/"):
                 link = f"https://www.google.com{link}"
@@ -232,11 +238,10 @@ def index():
                 "link": link, "score": trust_score
             })
     except Exception as e:
-        print(f"Error fetching recs: {e}")
+        print(f"Error: {e}")
     
     return render_template("index.html", user=current_user, recommendations=recommendations, rec_topic=query, t=t, lang=lang)
 
-# --- VISUAL SEARCH (CLOUDINARY) ---
 @app.route("/visual_search", methods=["POST"])
 @login_required
 def visual_search():
@@ -251,12 +256,10 @@ def visual_search():
 
     if file:
         try:
-            # 1. Upload to Cloudinary (No local storage needed)
             flash("Uploading image to AI cloud...", "info")
             upload_result = cloudinary.uploader.upload(file)
             img_url = upload_result["secure_url"]
             
-            # 2. Analyze with Google Lens
             params = {
                 "engine": "google_lens",
                 "url": img_url,
@@ -264,7 +267,6 @@ def visual_search():
             }
             data = requests.get("https://serpapi.com/search", params=params).json()
             
-            # 3. Find Best Match Title
             if "visual_matches" in data and len(data["visual_matches"]) > 0:
                 best_match = data["visual_matches"][0].get("title")
                 flash(f"AI identified: {best_match}", "success")
@@ -274,11 +276,10 @@ def visual_search():
 
         except Exception as e:
             print(f"Visual Search Error: {e}")
-            flash("Visual search failed. Check console.", "error")
+            flash("Visual search failed. Check console for details.", "error")
             
     return redirect(url_for('index'))
 
-# --- USER ROUTES ---
 @app.route("/account")
 @login_required
 def account():
@@ -361,12 +362,9 @@ def remove_cart(id):
         flash('Removed from Cart.', 'success')
     return redirect(url_for('cart'))
 
-# --- CHECKOUT FLOW (Payment -> Invoice) ---
-
 @app.route("/checkout")
 @login_required
 def checkout_page():
-    # 1. Shows the Payment UI (payment.html)
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
     if not cart_items:
         flash("Your cart is empty!", "error")
@@ -377,7 +375,6 @@ def checkout_page():
 @app.route("/generate_invoice")
 @login_required
 def generate_invoice():
-    # 2. Generates PDF and Clears Cart
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
     if not cart_items:
         return redirect(url_for('cart'))
@@ -385,14 +382,11 @@ def generate_invoice():
     total_price = sum(item.price_val for item in cart_items)
     date_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    # Render PDF Template
     rendered_html = render_template("invoice_pdf.html", user=current_user, items=cart_items, total=total_price, date=date_now)
     
-    # Clear Cart from DB
     for item in cart_items: db.session.delete(item)
     db.session.commit()
     
-    # Create PDF Buffer
     pdf_buffer = io.BytesIO()
     pisa_status = pisa.CreatePDF(io.BytesIO(rendered_html.encode("utf-8")), dest=pdf_buffer)
     
@@ -401,21 +395,17 @@ def generate_invoice():
     
     return send_file(pdf_buffer, as_attachment=True, download_name=f"Invoice_{current_user.username}.pdf", mimetype='application/pdf')
 
-# --- SEARCH & RESULTS ---
 @app.route("/search", methods=["GET", "POST"])
 @login_required
 def search():
     product = request.args.get("q") or request.form.get("product")
     sort_order = request.args.get("sort")
     if not product: return redirect(url_for('index'))
-    
-    # Save History
     if request.method == "POST" or (request.args.get("q") and not request.args.get("sort")):
         last = SearchHistory.query.filter_by(user_id=current_user.id).order_by(SearchHistory.timestamp.desc()).first()
         if not last or last.search_query != product:
             db.session.add(SearchHistory(user_id=current_user.id, search_query=product))
             db.session.commit()
-    
     try:
         params = {"engine": "google_shopping", "q": product, "hl": "en", "gl": "in", "api_key": SERP_API_KEY}
         data = requests.get("https://serpapi.com/search", params=params).json()
@@ -465,12 +455,10 @@ def admin():
     values = [s[1] for s in top_searches]
     return render_template("admin.html", total_users=total_users, total_searches=total_searches, total_wishlist=total_wishlist, labels=labels, values=values, user=current_user)
 
-# --- CHATBOT API ---
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message", "").lower()
     redirect_url = None
-    
     if "hello" in user_message or "hi" in user_message: response = "Hello! I am your Future Shop Assistant."
     elif "help" in user_message: response = "Try saying 'Search for iPhone' or 'Go to wishlist'."
     elif "search for" in user_message:
@@ -487,7 +475,6 @@ def chat():
         response = "Opening history..."
         redirect_url = url_for('account')
     else: response = "I didn't quite catch that."
-    
     return jsonify({"response": response, "redirect": redirect_url})
 
 if __name__ == "__main__":
