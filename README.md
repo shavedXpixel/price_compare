@@ -2,7 +2,7 @@
 
 A modern price comparison web application built using Flask that helps users find the best prices across Indian shopping platforms with a clean UI, particle background, and secure API handling.
 
-🔗 Live Demo: https://priyansu.me
+🔗 Live Demo: https://priyansu123.pythonanywhere.com/
 
 ✨ Features
 
