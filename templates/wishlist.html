@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wishlist</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        :root { --bg-color: #1f242d; --surface-color: #262c36; --shadow-dark: rgba(0, 0, 0, 0.6); --shadow-light: rgba(255, 255, 255, 0.05); --neon: #0ef; }
+        
+        body { background: var(--bg-color); color: #fff; min-height: 100vh; padding: 40px; }
+        h1 { text-align: center; color: var(--neon); margin-bottom: 40px; text-shadow: 0 0 10px var(--neon); }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px; }
+        
+        .card {
+            background: var(--surface-color); border-radius: 30px; padding: 25px;
+            box-shadow: 10px 10px 20px var(--shadow-dark), -10px -10px 20px var(--shadow-light);
+            text-align: center; transition: 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); }
+        
+        .img-box {
+            width: 100%; height: 160px; border-radius: 20px; background: var(--surface-color);
+            box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+            display: flex; justify-content: center; align-items: center; margin-bottom: 15px; padding: 10px;
+        }
+        .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        h3 { font-size: 1rem; height: 50px; overflow: hidden; }
+        .price { color: var(--neon); font-size: 1.2rem; font-weight: bold; margin: 10px 0; }
+        
+        .actions { display: flex; gap: 10px; justify-content: center; }
+        
+        .btn {
+            width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--surface-color);
+            color: #888; display: flex; justify-content: center; align-items: center; font-size: 1.2rem;
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+            cursor: pointer; text-decoration: none; transition: 0.2s;
+        }
+        .btn.buy:hover { color: var(--neon); }
+        .btn.del:hover { color: #ff3333; }
+        
+        .back-link { display: block; text-align: center; margin-top: 50px; color: #888; text-decoration: none; }
+
+        /* POPUP STYLE */
+        .flash { 
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
+            background: var(--surface-color); color: var(--neon); border: 1px solid var(--neon); 
+            padding: 10px 20px; border-radius: 15px; z-index: 200; box-shadow: 0 0 15px var(--neon); 
+        }
+    </style>
+</head>
+<body>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}<div class="flash">{{ message }}</div>{% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h1>My Wishlist</h1>
+    <div class="grid">
+        {% if wishlist %}
+            {% for item in wishlist %}
+            <div class="card">
+                <div class="img-box"><img src="{{ item.image }}"></div>
+                <h3>{{ item.title }}</h3>
+                <div class="price">{{ item.price }}</div>
+                <div class="actions">
+                    <form action="/add_to_cart" method="POST">
+                        <input type="hidden" name="title" value="{{ item.title }}"><input type="hidden" name="price" value="{{ item.price }}"><input type="hidden" name="image" value="{{ item.image }}"><input type="hidden" name="store" value="{{ item.store }}">
+                        <button type="submit" class="btn buy"><ion-icon name="cart"></ion-icon></button>
+                    </form>
+                    <a href="/remove_wishlist/{{ item.id }}" class="btn del"><ion-icon name="trash"></ion-icon></a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align:center; grid-column:1/-1;">No items in wishlist.</p>
+        {% endif %}
+    </div>
+    <a href="/" class="back-link">Back to Home</a>
+</body>
+</html>

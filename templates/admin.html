@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        :root { --bg-color: #1f242d; --surface-color: #262c36; --shadow-dark: rgba(0, 0, 0, 0.6); --shadow-light: rgba(255, 255, 255, 0.05); --neon: #0ef; }
+        
+        body { background: var(--bg-color); color: #fff; padding: 40px; }
+        
+        h1 { text-align: center; color: var(--neon); margin-bottom: 40px; text-shadow: 0 0 10px var(--neon); }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 50px; }
+        
+        .stat-card {
+            background: var(--surface-color); border-radius: 30px; padding: 30px; text-align: center;
+            box-shadow: 10px 10px 20px var(--shadow-dark), -10px -10px 20px var(--shadow-light);
+        }
+        .stat-num { font-size: 2.5rem; color: var(--neon); font-weight: bold; }
+        .stat-label { color: #888; margin-top: 10px; }
+        
+        .chart-box {
+            background: var(--surface-color); border-radius: 30px; padding: 30px;
+            box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+            max-width: 800px; margin: 0 auto;
+        }
+        
+        .back-link { display: block; text-align: center; margin-top: 50px; color: #888; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-num">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num">{{ total_searches }}</div>
+            <div class="stat-label">Total Searches</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num">{{ total_wishlist }}</div>
+            <div class="stat-label">Wishlist Items</div>
+        </div>
+    </div>
+
+    <div class="chart-box">
+        <canvas id="searchChart"></canvas>
+    </div>
+
+    <a href="/" class="back-link">Back to Home</a>
+
+    <script>
+        const ctx = document.getElementById('searchChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ labels|tojson }},
+                datasets: [{
+                    label: 'Top Searches',
+                    data: {{ values|tojson }},
+                    backgroundColor: '#0ef',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                scales: {
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#ccc' } },
+                    x: { grid: { display: false }, ticks: { color: '#ccc' } }
+                },
+                plugins: { legend: { labels: { color: '#fff' } } }
+            }
+        });
+    </script>
+</body>
+</html>
